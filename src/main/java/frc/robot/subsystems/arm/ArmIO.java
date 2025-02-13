@@ -1,19 +1,20 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.arm;
 
+import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ElevatorIO {
+public interface ArmIO {
   @AutoLog
-  public static class ElevatorIOInputs {
+  public static class ArmIOInputs {
     public boolean connected = false;
     public double height = 0;
     public double velocityRPM = 0.0;
     public boolean atTarget = false;
   }
 
-  public default void updateInputs(ElevatorIOInputs inputs) {}
+  public default void updateInputs(ArmIOInputs inputs) {}
 
-  public default void setElevatorHeightInches(double heightInches) {}
+  public default void setArmAngleDegrees(double heightInches) {}
 
   public default void runCharacterization(double output) {}
 
