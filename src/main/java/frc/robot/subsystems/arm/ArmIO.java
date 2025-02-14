@@ -1,6 +1,5 @@
 package frc.robot.subsystems.arm;
 
-import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {

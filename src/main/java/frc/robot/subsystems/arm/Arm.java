@@ -13,18 +13,21 @@ public class Arm extends SubsystemBase {
   private final SysIdRoutine sysId;
   private final ArmIOInputsAutoLogged armInputs = new ArmIOInputsAutoLogged();
 
-  // Tunable Numbers
-  private static final LoggedTunableNumber positionkP =
-      new LoggedTunableNumber("Arm/positionkP", ArmConstants.positionP);
-  private static final LoggedTunableNumber positionkD =
-      new LoggedTunableNumber("Arm/positionkD", ArmConstants.positionD);
-  private static final LoggedTunableNumber maxVelocityMetersPerSec =
-      new LoggedTunableNumber("Arm/MaxVelocityInchesPerSec", ArmConstants.maxVelocity);
-  private static final LoggedTunableNumber maxAccelerationMetersPerSec2 =
-      new LoggedTunableNumber("Arm/MaxAccelerationInchesPerSec2", ArmConstants.maxAcceleration);
-  private static final LoggedTunableNumber manualVelocInchesPerSec =
-      new LoggedTunableNumber("Arm/manualVelocityInchesPerSec", ArmConstants.manualVelocity);
+  // Tunable Numbers - Settable in Advantage Scope when tuning mode is enabled in
+  // main constants
+  // THESE ARE NOT SAVED - YOU MUST ENTER THEM INTO ARMCONSTANTS.JAVA
+  private static final LoggedTunableNumber positionkP = new LoggedTunableNumber("Arm/positionkP",
+      ArmConstants.positionP);
+  private static final LoggedTunableNumber positionkD = new LoggedTunableNumber("Arm/positionkD",
+      ArmConstants.positionD);
+  private static final LoggedTunableNumber maxVelocityMetersPerSec = new LoggedTunableNumber(
+      "Arm/MaxVelocityInchesPerSec", ArmConstants.maxVelocity);
+  private static final LoggedTunableNumber maxAccelerationMetersPerSec2 = new LoggedTunableNumber(
+      "Arm/MaxAccelerationInchesPerSec2", ArmConstants.maxAcceleration);
+  private static final LoggedTunableNumber manualVelocInchesPerSec = new LoggedTunableNumber(
+      "Arm/manualVelocityInchesPerSec", ArmConstants.manualVelocity);
 
+  /** Arm auto angling options - pass these into the setArmToAngle() function */
   public enum ArmPositions {
     loadPosition,
     homePosition,
@@ -34,25 +37,40 @@ public class Arm extends SubsystemBase {
     kLevel4;
   }
 
+  /**
+   * Creates arm subsystem - this class gives orders to an IO class that executes
+   * them
+   *
+   * <p>
+   * This allows quick swapping motor types, PID types, or if an empty arm IO is
+   * passed in it
+   * turns off elevator w/o breaking commands
+   *
+   * @param elevatorIO Class to execute arm commands
+   */
   public Arm(ArmIO armIO) {
     this.armIO = armIO;
 
-    sysId =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Arm/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    sysId = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> Logger.recordOutput("Arm/SysIdState", state.toString())),
+        new SysIdRoutine.Mechanism(
+            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
   @Override
   public void periodic() {
+    // Pulls feedback data from arm IO for logging - this is not used in code,
+    // simply for logging
     armIO.updateInputs(armInputs);
     Logger.processInputs("Arm", armInputs);
 
+    // Allows in real time changing of PID & max speed constants IF MAIN CONSTANTS
+    // TUNING MODE IS TRUE
+    // This does not save the constant - make sure to do this in ArmConstants.java
     if (positionkP.hasChanged(hashCode()) || positionkD.hasChanged(hashCode())) {
       armIO.setPositionPID(positionkP.get(), 0.0, positionkD.get());
     }
@@ -64,56 +82,58 @@ public class Arm extends SubsystemBase {
   }
 
   /**
-   * Sets Arm to preset height location Runs through the inches command before going to IO as to log
+   * Sets Arm to preset angle; Runs through the set angle command before going to
+   * IO as to log
    * setpoints
    *
    * @param position
    */
   public void setArmToAngle(ArmPositions position) {
     switch (position) {
-      case loadPosition:
-        setArmAngleInches(ArmConstants.loadAngle);
-        break;
-      case homePosition:
-        setArmAngleInches(ArmConstants.homeAngle);
-        break;
-      case kLevel1:
-        setArmAngleInches(ArmConstants.level1Angle);
-        break;
-      case kLevel2:
-        setArmAngleInches(ArmConstants.level2Angle);
-        break;
-      case kLevel3:
-        setArmAngleInches(ArmConstants.level3Angle);
-        break;
-      case kLevel4:
-        setArmAngleInches(ArmConstants.level4Angle);
-        break;
+      case loadPosition -> setArmAngleDegrees(ArmConstants.loadAngle);
+      case homePosition -> setArmAngleDegrees(ArmConstants.homeAngle);
+      case kLevel1 -> setArmAngleDegrees(ArmConstants.level1Angle);
+      case kLevel2 -> setArmAngleDegrees(ArmConstants.level2Angle);
+      case kLevel3 -> setArmAngleDegrees(ArmConstants.level3Angle);
+      case kLevel4 -> setArmAngleDegrees(ArmConstants.level4Angle);
 
-      default:
-        break;
+      default -> {
+      }
     }
   }
 
+  /**
+   * @return Returns if arm is within accaptable error margin of PID setpoint (FOR
+   *         ANGLE)
+   */
   public boolean atTargetAngle() {
     return armInputs.atTarget;
   }
 
-  public void setArmAngleInches(double degrees) {
+  /**
+   * Changes the arm position to an arbitrary degree value measured from arm
+   * straight up
+   *
+   * @param degrees
+   */
+  public void setArmAngleDegrees(double degrees) {
     Logger.recordOutput("Arm/AngleSetpoint", degrees);
     armIO.setArmAngleDegrees(degrees);
   }
 
+  /** Sets the velocity of arm to arbitrarily move up */
   public void manualArmUp() {
     Logger.recordOutput("Arm/Velocity Setpoint", ArmConstants.manualVelocity);
     armIO.setVelocity(ArmConstants.manualVelocity);
   }
 
+  /** Sets the velocity of arm to abritrarilly move down */
   public void manualArmDown() {
     Logger.recordOutput("Arm/Velocity Setpoint", -ArmConstants.manualVelocity);
     armIO.setVelocity(ArmConstants.manualVelocity);
   }
 
+  /** Sets the velocity of arm to 0 */
   public void manualArmStop() {
     Logger.recordOutput("Arm/Velocity Setpoint", 0);
     armIO.setVelocity(0);

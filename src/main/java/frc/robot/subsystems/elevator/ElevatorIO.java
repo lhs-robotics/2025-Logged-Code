@@ -5,10 +5,15 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   public static class ElevatorIOInputs {
+    // *Is elevator motor connected? */
     public boolean connected = false;
+    // *Elevator height from elevator 0 (not robot base) - given in inches */
     public double height = 0;
+    // *Elevator motor velocity in RPM */
     public double velocityRPM = 0.0;
+    // *Boolean if elevator is at height setpoint within margin of error */
     public boolean atTarget = false;
+    // TODO: ADD CARRIAGE VELOCITY
   }
 
   public default void updateInputs(ElevatorIOInputs inputs) {}
