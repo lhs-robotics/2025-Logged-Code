@@ -28,12 +28,10 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -79,7 +77,7 @@ public class ModuleIOSpark implements ModuleIO {
           default -> new Rotation2d();
         };
     driveSpark =
-        new SparkFlex(
+        new SparkMax(
             switch (module) {
               case 0 -> frontLeftDriveCanId;
               case 1 -> frontRightDriveCanId;
@@ -113,7 +111,7 @@ public class ModuleIOSpark implements ModuleIO {
     turnController = turnSpark.getClosedLoopController();
 
     // Configure drive motor
-    var driveConfig = new SparkFlexConfig();
+    var driveConfig = new SparkMaxConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(driveMotorCurrentLimit)

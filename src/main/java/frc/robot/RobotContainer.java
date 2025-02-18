@@ -72,7 +72,7 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        elevator = new Elevator(new ElevatorIOSpark());
+        elevator = new Elevator(new ElevatorIO() {});
         // Real robot, instantiate hardware IO implementations
         vision =
             new Vision(
