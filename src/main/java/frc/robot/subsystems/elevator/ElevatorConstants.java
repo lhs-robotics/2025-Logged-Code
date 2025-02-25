@@ -4,6 +4,15 @@ public class ElevatorConstants {
   public static final int motor1ID = 21;
   public static final int motor2ID = 22;
 
+  public static final int L1Button = 1;
+  public static final int L2Button = 2;
+  public static final int L3Button = 3;
+  public static final int L4Button = 4; 
+  public static final int HomeButton = 5;
+
+  public static final int ManualDownButton = 7;
+  public static final int ManualUpButton = 6;
+
   public static final int elevatorMotorSmartCurrentLimit = 40;
 
   public static final boolean motor1Inveted = false;

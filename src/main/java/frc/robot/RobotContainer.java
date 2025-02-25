@@ -1,16 +1,3 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -23,8 +10,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.stateCommands.AlgaeState;
+import frc.robot.commands.stateCommands.CoralState;
+import frc.robot.commands.stateCommands.ClimbState;
+import frc.robot.commands.stateCommands.DefenseState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -34,12 +26,14 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.DriverFeedback;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -52,10 +46,12 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final Elevator elevator;
+  private final DriverFeedback driverFeedback;
 
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final GenericHID buttonboard = new GenericHID(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -73,6 +69,7 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         elevator = new Elevator(new ElevatorIO() {});
+        driverFeedback = new DriverFeedback();
         // Real robot, instantiate hardware IO implementations
         vision =
             new Vision(
@@ -98,6 +95,7 @@ public class RobotContainer {
 
         // Don't instatiate an actual elevator
         elevator = new Elevator(new ElevatorIO() {});
+        driverFeedback = new DriverFeedback();
 
         break;
 
@@ -112,7 +110,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         elevator = new Elevator(new ElevatorIO() {});
-
+        driverFeedback = new DriverFeedback();
         break;
     }
 
@@ -187,6 +185,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    new JoystickButton(buttonboard, 0).onTrue(new CoralState());
+    new JoystickButton(buttonboard, 1).onTrue(new AlgaeState());
+    new JoystickButton(buttonboard, 2).onTrue(new DefenseState());
+    new JoystickButton(buttonboard, 3).onTrue(new ClimbState());
+
   }
 
   /**

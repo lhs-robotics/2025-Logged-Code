@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
-import static frc.robot.util.SparkUtil.ifOk;
+import static frc.robot.util.SparkUtil.ifOk; 
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 public class ElevatorIOSpark implements ElevatorIO {

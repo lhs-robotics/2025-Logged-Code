@@ -10,6 +10,9 @@ public class ArmConstants {
   public static final double manualVelocity = 0;
   public static final double positionP = 0;
   public static final double positionD = 0;
-  public static final double maxVelocity = 0;
+  public static final double maxVelocity = 0; 
   public static final double maxAcceleration = 0;
+
+  public static final int ManualDownButton = 9;
+  public static final int ManualUpButton = 8;
 }
