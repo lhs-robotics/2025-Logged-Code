@@ -26,6 +26,9 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOSpark;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -44,38 +47,44 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
-  private final Vision vision;
-  private final Elevator elevator;
+    // Subsystems
+    private final Drive drive;
+    private final Vision vision;
+    private final Elevator elevator;
+    private final Arm arm;
 
-  // Controller
-  private final CommandXboxController driveController = new CommandXboxController(0);
-  private final CommandXboxController operatorController = new CommandXboxController(1);
+    // Controller
+    private final CommandXboxController driveController = new CommandXboxController(0);
+    private final CommandXboxController operatorController = new CommandXboxController(1);
+    private final CommandXboxController testController = new CommandXboxController(2);
+
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSpark(0),
-                new ModuleIOSpark(1),
-                new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
-        elevator = new Elevator(new ElevatorIO() {});
-        // Real robot, instantiate hardware IO implementations
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
-        break;
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
+    public RobotContainer() {
+        switch (Constants.currentMode) {
+            case REAL:
+                // Real robot, instantiate hardware IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIOSpark(0),
+                        new ModuleIOSpark(1),
+                        new ModuleIOSpark(2),
+                        new ModuleIOSpark(3));
+                elevator = new Elevator(new ElevatorIO() {
+                });
+                arm = new Arm(new ArmIOSpark());
+                // Real robot, instantiate hardware IO implementations
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight(camera0Name, drive::getRotation),
+                        new VisionIOLimelight(camera1Name, drive::getRotation));
+                break;
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
@@ -91,25 +100,37 @@ public class RobotContainer {
                         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                         new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
-        // Don't instatiate an actual elevator
-        elevator = new Elevator(new ElevatorIO() {});
+                // Don't instatiate an actual elevator
+                elevator = new Elevator(new ElevatorIO() {
+                });
+                arm = new Arm(new ArmIO() {
+                });
 
                 break;
 
-      default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        elevator = new Elevator(new ElevatorIO() {});
+            default:
+                // Replayed robot, disable IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        });
+                vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+                }, new VisionIO() {
+                });
+                elevator = new Elevator(new ElevatorIO() {
+                });
+                arm = new Arm(new ArmIO() {
+                });
 
-        break;
-    }
+                break;
+        }
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -175,17 +196,19 @@ public class RobotContainer {
         // Switch to X pattern when X button is pressed
         driveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
-    driveController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
-  }
+        // Reset gyro to 0° when B button is pressed
+        driveController
+                .b()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> drive.setPose(
+                                        new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                drive)
+                                .ignoringDisable(true));
+        operatorController.a().onTrue(Commands.runOnce(() -> arm.setArmAngleDegrees(0), arm))       ;                           
+        operatorController.x().onTrue(Commands.runOnce(() -> arm.setArmAngleDegrees(45), arm))       ; 
+        operatorController.y().onTrue(Commands.runOnce(() -> arm.setArmAngleDegrees(90), arm))       ; 
+    }
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

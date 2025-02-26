@@ -15,4 +15,7 @@ public class ArmConstants {
   public static final double positionD = 0;
   public static final double maxVelocity = 0; 
   public static final double maxAcceleration = 0;
+
+  public static final int gearBoxCurrentLimit = 50;
+  public static final boolean gearBoxInveted = true;
 }
