@@ -29,14 +29,14 @@ public class Climb extends SubsystemBase {
         .inverted(ClimbConstants.climbMotorInverted);
     }
 
-    public void climbUp(double speed) {
-        climbMotor.set(speed);
+    public void climbUp() {
+        climbMotor.set(ClimbConstants.speed);
     }
 
     //method for getting climb to retract - not sure if it would function as desired 
-    public void climbDown(double speed) {
+    public void climbDown() {
         // climbMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        climbMotor.set(speed);
+        climbMotor.set(ClimbConstants.speed);
     }
 
     public void turnOff() {

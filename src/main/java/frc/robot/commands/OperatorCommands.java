@@ -12,6 +12,8 @@ import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.elevator.ElevatorIOInputsAutoLogged;
 import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 
 public class OperatorCommands {
 
@@ -73,6 +75,18 @@ public class OperatorCommands {
         }, arm);
     }
 
+    public static Command ClimbUp(Climb climb){
+        return Commands.run(() -> { climb.climbUp();
+        }, climb);
+    }
 
-
+    public static Command ClimbDown(Climb climb){
+        return Commands.run(() -> { climb.climbDown();
+        }, climb);
+    }
+   
+    public static Command ClimbOff(Climb climb){
+        return Commands.run(() -> { climb.turnOff();
+        }, climb);
+    }
 }
