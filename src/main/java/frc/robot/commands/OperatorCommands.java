@@ -50,6 +50,14 @@ public class OperatorCommands {
                 }, elevator, arm);
     }
 
+    public static Command HomeCommand(Elevator elevator, Arm arm){
+        return Commands.run(
+            ()-> {
+                elevator.setElevatorHeightInches(ElevatorConstants.homeHeight);
+                arm.setArmAngleDegrees(ArmConstants.homeAngle);
+            }, elevator, arm);
+    }
+
 
     public static Command ElevatorManualUp(Elevator elevator){
         return Commands.run(() -> { elevator.manualElevatorUp();
@@ -72,6 +80,8 @@ public class OperatorCommands {
         return Commands.run(() -> { arm.manualArmDown();
         }, arm);
     }
+
+    //create commands for climb
 
 
 
