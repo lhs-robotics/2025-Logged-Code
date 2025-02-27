@@ -139,6 +139,13 @@ public class Arm extends SubsystemBase {
     armIO.setVelocity(0);
   }
 
+  public void endAffectorIntakeEnable() {
+
+  }
+  public void endAffectorIntakeDisable() {
+
+  }
+
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0))
@@ -154,4 +161,6 @@ public class Arm extends SubsystemBase {
   private void runCharacterization(double output) {
     armIO.runCharacterization(output);
   }
+
+  
 }

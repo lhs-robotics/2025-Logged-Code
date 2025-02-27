@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
-import frc.robot.subsystems.DriverFeedback;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.feedback.DriverFeedback;
 
 public class LEDPatternsCommands extends Command {
     

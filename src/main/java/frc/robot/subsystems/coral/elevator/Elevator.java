@@ -6,10 +6,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.subsystems.coral.elevator.ElevatorIOInputsAutoLogged;
 import frc.robot.util.LoggedTunableNumber;
-
-import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
   final ElevatorIO elevatorIO;
@@ -34,7 +31,8 @@ public class Elevator extends SubsystemBase {
 
   /** Elevator auto positions options - pass these into the setElevatorToLocation() function */
   public enum elevatorPositions {
-    loadPosition,
+    preLoadPosition,
+    loaded,
     homePosition,
     kLevel1,
     kLevel2,
@@ -96,7 +94,7 @@ public class Elevator extends SubsystemBase {
    */
   public void setElevatorToLocation(elevatorPositions position) {
     switch (position) {
-      case loadPosition:
+      case preLoadPosition:
         setElevatorHeightInches(ElevatorConstants.loadHeight);
         break;
       case homePosition:
