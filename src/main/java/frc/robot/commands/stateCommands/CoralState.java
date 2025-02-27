@@ -22,7 +22,7 @@ public class CoralState extends InstantCommand {
     // private Arm arm;
     // private Climb climb;
 
-    // new ParallelCommandGroup(new Command(OperatorCommands.HomeCommand()), new Command(climb) );
+    // new ParallelCommandGroup(new Command(OperatorCommands.HomeCommand()), new Command() );
     // Parallel:
     // 1. Set climb setpoint 0
     // 2. Set algae setpoint 0
