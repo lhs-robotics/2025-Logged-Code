@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.coral.elevator;
 
 public class ElevatorConstants {
   public static final int motor1ID = 21;

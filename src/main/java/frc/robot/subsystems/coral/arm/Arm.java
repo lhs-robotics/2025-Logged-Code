@@ -1,12 +1,12 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.coral.arm;
 
-import static edu.wpi.first.units.Units.*;
+import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
   final ArmIO armIO;
