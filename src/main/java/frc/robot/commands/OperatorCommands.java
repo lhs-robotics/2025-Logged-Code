@@ -2,23 +2,16 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.arm.ArmConstants;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorConstants;
-import frc.robot.subsystems.elevator.ElevatorIOSpark;
-import frc.robot.subsystems.elevator.ElevatorIOInputsAutoLogged;
-import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbConstants;
+import frc.robot.subsystems.coral.arm.Arm;
+import frc.robot.subsystems.coral.arm.ArmConstants;
+import frc.robot.subsystems.coral.elevator.Elevator;
+import frc.robot.subsystems.coral.elevator.ElevatorConstants;
 
 public class OperatorCommands {
 
-
-    private OperatorCommands() {}
+    private OperatorCommands() {
+    }
 
     public static Command Level4(Elevator elevator, Arm arm) {
         return Commands.run(
@@ -52,14 +45,6 @@ public class OperatorCommands {
                 }, elevator, arm);
     }
 
-    public static Command HomeCommand(Elevator elevator, Arm arm){
-        return Commands.run(
-            ()-> {
-                elevator.setElevatorHeightInches(ElevatorConstants.homeHeight);
-                arm.setArmAngleDegrees(ArmConstants.homeAngle);
-            }, elevator, arm);
-    }
-
 
     public static Command ElevatorManualUp(Elevator elevator){
         return Commands.run(() -> { elevator.manualElevatorUp();
@@ -67,34 +52,40 @@ public class OperatorCommands {
 
     }
 
-    public static Command ElevatorManualDown(Elevator elevator){
-        return Commands.run(() -> { elevator.manualElevatorDown();
+    public static Command ElevatorManualDown(Elevator elevator) {
+        return Commands.run(() -> {
+            elevator.manualElevatorDown();
         }, elevator);
 
     }
 
-    public static Command ArmManualUp(Arm arm){
-        return Commands.run(() -> { arm.manualArmUp();
+    public static Command ArmManualUp(Arm arm) {
+        return Commands.run(() -> {
+            arm.manualArmUp();
         }, arm);
     }
 
-    public static Command ArmManualDown(Arm arm){
-        return Commands.run(() -> { arm.manualArmDown();
+    public static Command ArmManualDown(Arm arm) {
+        return Commands.run(() -> {
+            arm.manualArmDown();
         }, arm);
     }
 
-    public static Command ClimbUp(Climb climb){
-        return Commands.run(() -> { climb.climbUp();
+    public static Command ClimbInBumper(Climb climb) {
+        return Commands.run(() -> {
+            climb.setClimbInBumper();
         }, climb);
     }
 
-    public static Command ClimbDown(Climb climb){
-        return Commands.run(() -> { climb.climbDown();
+    public static Command ClimbOutBumper(Climb climb) {
+        return Commands.run(() -> {
+            climb.setClimbOutBumper();
         }, climb);
     }
-   
-    public static Command ClimbOff(Climb climb){
-        return Commands.run(() -> { climb.turnOff();
+
+    public static Command ClimbOff(Climb climb) {
+        return Commands.run(() -> {
+            climb.disable();
         }, climb);
     }
 }

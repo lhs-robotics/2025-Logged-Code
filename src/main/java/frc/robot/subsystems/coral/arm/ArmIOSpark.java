@@ -1,22 +1,21 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.coral.arm;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.filter.Debouncer;
-
+import frc.robot.subsystems.coral.elevator.ElevatorConstants;
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
-
-import frc.robot.subsystems.elevator.ElevatorConstants;
 
 public class ArmIOSpark implements ArmIO {
     private final SparkMax gearboxSpark;
@@ -24,10 +23,13 @@ public class ArmIOSpark implements ArmIO {
     private final SparkClosedLoopController gearboxPID;
     private double angleSetpoint = 0.0;
 
+    private final SparkMax endAffectorMotor;
+
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
     public ArmIOSpark() {
         gearboxSpark = new SparkMax(ArmConstants.gearboxSparkID, MotorType.kBrushless);
+        endAffectorMotor = new SparkMax(ArmConstants.endAffectorSparkID, MotorType.kBrushless);
 
         gearboxEncoder = gearboxSpark.getEncoder();
         gearboxPID = gearboxSpark.getClosedLoopController();
@@ -48,9 +50,20 @@ public class ArmIOSpark implements ArmIO {
                 .i(0)
                 .d(ArmConstants.positionD)
                 .outputRange(-1, 1);
-                
+        gearMotorConfig.closedLoop
+                .p(ArmConstants.velocityP, ClosedLoopSlot.kSlot1)
+                .i(ArmConstants.velocityI, ClosedLoopSlot.kSlot1)
+                .d(ArmConstants.velocityD, ClosedLoopSlot.kSlot1);
+
         gearboxSpark.configure(gearMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         gearboxEncoder.setPosition(0);
+
+        SparkMaxConfig endAffectorConfig = new SparkMaxConfig();
+        endAffectorConfig.idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(ArmConstants.endAffectorCurrentLimit)
+                .voltageCompensation(12.0)
+                .inverted(ArmConstants.endAffectorInverted);
+        endAffectorMotor.configure(endAffectorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public boolean checkAtTarget() {
@@ -86,10 +99,36 @@ public class ArmIOSpark implements ArmIO {
     @Override
     public void updateInputs(ArmIOInputs inputs) {
         sparkStickyFault = false;
-        ifOk(gearboxSpark, gearboxEncoder::getPosition, (value) -> inputs.height = value);
-        ifOk(gearboxSpark, gearboxEncoder::getVelocity, (value) -> inputs.velocityRPM = value);
+        ifOk(gearboxSpark, gearboxEncoder::getPosition, (value) -> inputs.angle = value);
+        ifOk(gearboxSpark, gearboxEncoder::getVelocity, (value) -> inputs.gearboxVelocityRPM = value);
+        ifOk(endAffectorMotor, endAffectorMotor::get, (value) -> inputs.endAffectorMotorSpeed = value);
         inputs.atTarget = checkAtTarget();
         inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
+    }
+
+    @Override
+    public void disableEndAffectorBrake() {
+        SparkMaxConfig endAffectorConfig = new SparkMaxConfig();
+        endAffectorConfig.idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(ArmConstants.endAffectorCurrentLimit)
+                .voltageCompensation(12.0)
+                .inverted(ArmConstants.endAffectorInverted);
+        endAffectorMotor.configure(endAffectorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    @Override
+    public void enableEndAffectorBrake() {
+        SparkMaxConfig endAffectorConfig = new SparkMaxConfig();
+        endAffectorConfig.idleMode(IdleMode.kBrake)
+                .smartCurrentLimit(ArmConstants.endAffectorCurrentLimit)
+                .voltageCompensation(12.0)
+                .inverted(ArmConstants.endAffectorInverted);
+        endAffectorMotor.configure(endAffectorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    @Override
+    public void setEndAffectorSpeed(double speed) {
+        endAffectorMotor.set(speed);
     }
 
 }

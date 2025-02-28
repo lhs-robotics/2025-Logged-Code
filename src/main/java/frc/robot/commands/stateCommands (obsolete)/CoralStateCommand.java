@@ -16,13 +16,7 @@ import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 
-public class CoralState extends InstantCommand {
-
-    // private Elevator elevator;
-    // private Arm arm;
-    // private Climb climb;
-
-    // new ParallelCommandGroup(new Command(OperatorCommands.HomeCommand()), new Command() );
+public class CoralStateCommand extends InstantCommand {
     // Parallel:
     // 1. Set climb setpoint 0
     // 2. Set algae setpoint 0

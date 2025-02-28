@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.coral.elevator;
 
 public class ElevatorConstants {
   public static final int motor1ID = 21;
@@ -7,7 +7,7 @@ public class ElevatorConstants {
   public static final int L1Button = 1;
   public static final int L2Button = 2;
   public static final int L3Button = 3;
-  public static final int L4Button = 4; 
+  public static final int L4Button = 4;
   public static final int HomeButton = 5;
 
   public static final int ManualDownButton = 7;
@@ -41,4 +41,8 @@ public class ElevatorConstants {
   public static final double kG = 0;
   public static final double kV = 0;
   public static final double kA = 0;
+  
+  public static final double velocityP = 0;
+  public static final double velocityI = 0;
+  public static final double velocityD = 0;
 }

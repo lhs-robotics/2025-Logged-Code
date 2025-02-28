@@ -1,12 +1,15 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.coral.arm;
 
-import static edu.wpi.first.units.Units.*;
+import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
   final ArmIO armIO;
@@ -88,7 +91,7 @@ public class Arm extends SubsystemBase {
    *
    * @param position
    */
-  public void setArmToAngle(ArmPositions position) {
+  public void setArmToPosition(ArmPositions position) {
     switch (position) {
       case loadPosition -> setArmAngleDegrees(ArmConstants.loadAngle);
       case homePosition -> setArmAngleDegrees(ArmConstants.homeAngle);
@@ -139,6 +142,27 @@ public class Arm extends SubsystemBase {
     armIO.setVelocity(0);
   }
 
+
+  // Sepereate commands for easy use in auto load routine
+  public void endAffectorIntakeEnable() {
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralIntakeSpeed);
+    armIO.setEndAffectorSpeed(ArmConstants.coralIntakeSpeed);
+  }
+  public void endAffectorIntakeDisable() {
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", 0);
+    armIO.setEndAffectorSpeed(0);
+  }
+
+  public Command releaseCoral() {
+    return new SequentialCommandGroup(new InstantCommand(this::releaseCoralBegin), new WaitCommand(ArmConstants.coralReleaseTimeSecs), new InstantCommand(this::endAffectorIntakeDisable));
+  }
+
+  private void releaseCoralBegin() {
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralReleaseSpeed);
+    armIO.setEndAffectorSpeed(ArmConstants.coralReleaseSpeed);
+  }
+
+
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0))
@@ -154,4 +178,17 @@ public class Arm extends SubsystemBase {
   private void runCharacterization(double output) {
     armIO.runCharacterization(output);
   }
+
+public void disable() {
+    setArmToPosition(ArmPositions.homePosition);
+    endAffectorIntakeDisable();
+    armIO.disableEndAffectorBrake();
+}
+
+public void enable() {
+  setArmToPosition(ArmPositions.loadPosition);
+  armIO.enableEndAffectorBrake();
+}
+
+  
 }

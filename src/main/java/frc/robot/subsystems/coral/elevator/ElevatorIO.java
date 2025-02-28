@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.coral.elevator;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -17,6 +17,10 @@ public interface ElevatorIO {
   }
 
   public default void updateInputs(ElevatorIOInputs inputs) {}
+
+  public default void enableBreak() {}
+
+  public default void disableBreak(){}
 
   public default void setElevatorHeightInches(double heightInches) {}
 
