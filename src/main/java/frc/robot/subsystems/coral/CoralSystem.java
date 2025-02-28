@@ -4,35 +4,44 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Arm.ArmIntakeCommand;
+import frc.robot.commands.coral.LoadCoral;
 import frc.robot.subsystems.coral.CoralConstants.CoralState;
 import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
+import frc.robot.subsystems.feedback.DriverFeedback;
 
 public class CoralSystem extends SubsystemBase {
-    private final Arm arm;
-    private final Elevator elevator;
+    public final Arm arm;
+    public final Elevator elevator;
     private final CANrange canRange;
+    private final DriverFeedback feedback;
+
     private CoralState currentState;
     private boolean autoLoadCoral = false;
-    ArmIntakeCommand armIntakeCommand;
     Trigger autoLoadTrigger;
 
-    public CoralSystem(Arm arm, Elevator elevator) {
+    private final LoadCoral loadCoralCommand;
+
+    public CoralSystem(Arm arm, Elevator elevator, DriverFeedback feedback) {
         this.arm = arm;
         this.elevator = elevator;
         this.canRange = new CANrange(CoralConstants.canRangeID);
+        this.feedback = feedback;
 
         currentState = CoralState.kStow;
 
-        // When 
-        armIntakeCommand = new ArmIntakeCommand(arm, elevator);
+        loadCoralCommand = new LoadCoral(this, feedback);
+
+        // If autoLoadCoral is true run "loadCoralCommand" when in range
         autoLoadTrigger = new Trigger(this::triggerCoralAutoLoad);
-        autoLoadTrigger.onTrue(armIntakeCommand);
+        autoLoadTrigger.onTrue(
+                new SequentialCommandGroup(loadCoralCommand, new InstantCommand(() -> this.autoLoadCoral = false)));
     }
 
     private boolean triggerCoralAutoLoad() {
@@ -80,7 +89,13 @@ public class CoralSystem extends SubsystemBase {
         }
     }
 
-    public Command loadCoral () {
-        return 
+    public void disable() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'disable'");
+    }
+
+    public void enable() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'enable'");
     }
 }

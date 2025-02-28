@@ -4,7 +4,10 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
 
@@ -144,6 +147,10 @@ public class Arm extends SubsystemBase {
   }
   public void endAffectorIntakeDisable() {
 
+  }
+
+  public Command releaseCoral() {
+    return new SequentialCommandGroup(new InstantCommand(), new WaitCommand(1), new InstantCommand());
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */

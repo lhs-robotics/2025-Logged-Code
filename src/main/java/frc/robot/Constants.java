@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.StateManager.RobotState;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -25,6 +26,9 @@ public final class Constants {
 
   public static final boolean tuningMode = false;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
+  public static final RobotState autoInitState = RobotState.coral;
+  public static final RobotState teleopInitState = RobotState.coral; 
 
   public static enum Mode {
     /** Running on a real robot. */

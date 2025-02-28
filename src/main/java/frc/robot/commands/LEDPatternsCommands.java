@@ -15,7 +15,7 @@ public class LEDPatternsCommands extends Command {
 
     @Override
     public void initialize() {
-        driverFeedback.setLEDPattern(patternValue);
+        // driverFeedback.setLEDPattern(patternValue);
     }
 
     @Override 

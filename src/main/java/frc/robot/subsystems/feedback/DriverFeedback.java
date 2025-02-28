@@ -9,9 +9,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.StateManager.RobotState;
 import frc.robot.subsystems.feedback.FeedbackConstants.FeedbackType;
 import static frc.robot.subsystems.feedback.FeedbackConstants.ledFeedbackTable;
-import frc.robot.subsystems.feedback.FeedbackConstants.ledModePatterns;
 import static frc.robot.subsystems.feedback.FeedbackConstants.ledModeTable;
 
 public class DriverFeedback extends SubsystemBase {
@@ -21,7 +21,7 @@ public class DriverFeedback extends SubsystemBase {
     private final CommandXboxController driverController;
 
     // Track current mode to be able to back after feedback
-    private ledModePatterns currentModePattern = ledModePatterns.disabled;
+    private RobotState currentMode;
 
     public DriverFeedback(CommandXboxController driverController) {
         blinkin = new PWMSparkMax(FeedbackConstants.blinkinPort);
@@ -29,8 +29,8 @@ public class DriverFeedback extends SubsystemBase {
         this.driverController = driverController;
     }
 
-    public void updateModeLEDs(ledModePatterns modePattern) {
-        currentModePattern = modePattern;
+    public void updateModeLEDs(RobotState modePattern) {
+        currentMode = modePattern;
         Logger.recordOutput("Feedback/LEDMode", modePattern);
         Logger.recordOutput("Feedback/LEDControllerNum", ledModeTable.get(modePattern));
         blinkin.set(ledModeTable.get(modePattern));
@@ -51,7 +51,7 @@ public class DriverFeedback extends SubsystemBase {
         Commands.sequence(
                 new InstantCommand(() -> blinkin.set(ledFeedbackTable.get(feedbackType))),
                 new WaitCommand(FeedbackConstants.feedbackLedLength),
-                new InstantCommand(() -> blinkin.set(ledModeTable.get(currentModePattern))));
+                new InstantCommand(() -> blinkin.set(ledModeTable.get(currentMode))));
 
         Commands.sequence(
                 new InstantCommand(this::rumbleOn),
