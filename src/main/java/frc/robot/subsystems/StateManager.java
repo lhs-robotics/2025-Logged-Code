@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Algae.Algae;
+import frc.robot.subsystems.algae.Algae;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.coral.CoralSystem;
 import frc.robot.subsystems.feedback.DriverFeedback;
