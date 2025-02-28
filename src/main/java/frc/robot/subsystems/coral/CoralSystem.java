@@ -2,8 +2,6 @@ package frc.robot.subsystems.coral;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.hardware.CANrange;
-
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,38 +12,36 @@ import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
+import frc.robot.subsystems.coral.indexer.Indexer;
 import frc.robot.subsystems.feedback.DriverFeedback;
 
 public class CoralSystem extends SubsystemBase {
     public final Arm arm;
     public final Elevator elevator;
-    private final CANrange canRange;
     private final DriverFeedback feedback;
+    private final Indexer indexer;
 
     private CoralState currentState;
     private boolean autoLoadCoral = false;
-    Trigger autoLoadTrigger;
 
     private final LoadCoral loadCoralCommand;
 
-    public CoralSystem(Arm arm, Elevator elevator, DriverFeedback feedback) {
+    private final Trigger autoLoadTrigger;
+
+    public CoralSystem(Arm arm, Elevator elevator, Indexer indexer, DriverFeedback feedback) {
         this.arm = arm;
         this.elevator = elevator;
-        this.canRange = new CANrange(CoralConstants.canRangeID);
+        this.indexer = indexer;
         this.feedback = feedback;
 
         currentState = CoralState.kStow;
 
         loadCoralCommand = new LoadCoral(this, feedback);
+        autoLoadTrigger = new Trigger(() -> autoLoadCoral == true).and(indexer.getAutoLoadTrigger());
 
         // If autoLoadCoral is true run "loadCoralCommand" when in range
-        autoLoadTrigger = new Trigger(this::triggerCoralAutoLoad);
         autoLoadTrigger.onTrue(
                 new SequentialCommandGroup(loadCoralCommand, new InstantCommand(() -> this.autoLoadCoral = false)));
-    }
-
-    private boolean triggerCoralAutoLoad() {
-        return canRange.getIsDetected().getValue() && autoLoadCoral;
     }
 
     public void setCoralState(CoralState state) {
@@ -58,28 +54,39 @@ public class CoralSystem extends SubsystemBase {
 
         switch (state) {
             case kStow -> {
+                indexer.disableIndexMotor();
+
                 elevator.setElevatorToLocation(elevatorPositions.homePosition);
                 arm.setArmToPosition(ArmPositions.homePosition);
             }
             case kL1 -> {
+                indexer.disableIndexMotor();
+
                 elevator.setElevatorToLocation(elevatorPositions.kLevel1);
                 arm.setArmToPosition(ArmPositions.kLevel1);
             }
             case kL2 -> {
+                indexer.disableIndexMotor();
+
                 elevator.setElevatorToLocation(elevatorPositions.kLevel2);
                 arm.setArmToPosition(ArmPositions.kLevel2);
             }
             case kL3 -> {
+                indexer.disableIndexMotor();
+
                 elevator.setElevatorToLocation(elevatorPositions.kLevel3);
                 arm.setArmToPosition(ArmPositions.kLevel3);
             }
             case kL4 -> {
+                indexer.disableIndexMotor();
+
                 elevator.setElevatorToLocation(elevatorPositions.kLevel4);
                 arm.setArmToPosition(ArmPositions.kLevel4);
             }
             case kPreLoad -> {
                 elevator.setElevatorToLocation(elevatorPositions.preLoadPosition);
                 arm.setArmToPosition(ArmPositions.loadPosition);
+                indexer.enableIndexMotor();
 
                 if (CoralConstants.autoLoadEnabled) {
                     autoLoadCoral = true;
@@ -92,10 +99,12 @@ public class CoralSystem extends SubsystemBase {
     public void disable() {
         elevator.disable();
         arm.disable();
+        indexer.disableIndexMotor();
     }
 
     public void enable() {
         elevator.enable();
         arm.enable();
+        indexer.disableIndexMotor();
     }
 }
