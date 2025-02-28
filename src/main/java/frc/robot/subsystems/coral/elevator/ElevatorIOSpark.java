@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
-import static frc.robot.util.SparkUtil.ifOk; 
+import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 public class ElevatorIOSpark implements ElevatorIO {
@@ -23,11 +23,13 @@ public class ElevatorIOSpark implements ElevatorIO {
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController elevatorController;
 
-  // For checking if Max has any faults in the span of .5 secs, even if they go away
+  // For checking if Max has any faults in the span of .5 secs, even if they go
+  // away
   // (To check for flashing faults / kind of connected motor)
   private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-  // Records current setpoint to be able to check if elevator is at it (DO NOT MODIFY)
+  // Records current setpoint to be able to check if elevator is at it (DO NOT
+  // MODIFY)
   private double heighSetpoint = 0.0;
 
   ElevatorFeedforward feedForward;
@@ -64,6 +66,10 @@ public class ElevatorIOSpark implements ElevatorIO {
         .i(ElevatorConstants.positionI)
         .d(ElevatorConstants.positionD)
         .outputRange(-1, 1);
+    motorConfig.closedLoop
+        .p(ElevatorConstants.velocityP, ClosedLoopSlot.kSlot1)
+        .i(ElevatorConstants.velocityI, ClosedLoopSlot.kSlot1)
+        .d(ElevatorConstants.velocityD, ClosedLoopSlot.kSlot1);
 
     motorConfig.closedLoop.maxMotion
         // These are the speeds max motion will attempt to achieve (not maximum it will
