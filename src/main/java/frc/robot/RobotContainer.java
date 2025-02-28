@@ -25,6 +25,9 @@ import frc.robot.subsystems.coral.arm.ArmIOSpark;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.ElevatorIO;
 import frc.robot.subsystems.coral.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.coral.indexer.Indexer;
+import frc.robot.subsystems.coral.indexer.IndexerIO;
+import frc.robot.subsystems.coral.indexer.IndexerIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -84,7 +87,7 @@ public class RobotContainer {
 						new ModuleIOSpark(3));
 				coralSys = new CoralSystem(
 						new Arm(new ArmIOSpark()),
-						new Elevator(new ElevatorIOSpark()),
+						new Elevator(new ElevatorIOSpark()), new Indexer(new IndexerIOSpark()),
 						driverFeedback);
 				vision = new Vision(
 						drive::addVisionMeasurement,
@@ -116,6 +119,9 @@ public class RobotContainer {
 						}),
 						new Elevator(new ElevatorIO() {
 						}),
+						new Indexer(new IndexerIO() {
+
+						}),
 						driverFeedback);
 				climb = new Climb(new ClimbIO() {
 
@@ -143,6 +149,9 @@ public class RobotContainer {
 						new Arm(new ArmIO() {
 						}),
 						new Elevator(new ElevatorIO() {
+						}),
+						new Indexer(new IndexerIO() {
+
 						}),
 						driverFeedback);
 				climb = new Climb(new ClimbIO() {
