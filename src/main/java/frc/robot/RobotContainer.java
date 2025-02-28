@@ -3,6 +3,7 @@ package frc.robot;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,14 +11,21 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Algae.Algae;
+import frc.robot.commands.auto.AlignmentCommands;
+import frc.robot.commands.coral.DelayUntilCoralIntake;
+import frc.robot.commands.coral.ReleaseCoral;
 import frc.robot.subsystems.StateManager;
+import frc.robot.subsystems.algae.Algae;
+import frc.robot.subsystems.algae.AlgaeIO;
+import frc.robot.subsystems.algae.AlgaeIOSpark;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSpark;
+import frc.robot.subsystems.coral.CoralConstants.CoralState;
 import frc.robot.subsystems.coral.CoralSystem;
 import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.ArmIO;
@@ -94,7 +102,7 @@ public class RobotContainer {
 						new VisionIOLimelight(camera0Name, drive::getRotation),
 						new VisionIOLimelight(camera1Name, drive::getRotation));
 				climb = new Climb(new ClimbIOSpark());
-				algae = new Algae();
+				algae = new Algae(new AlgaeIOSpark());
 
 			}
 
@@ -126,7 +134,9 @@ public class RobotContainer {
 				climb = new Climb(new ClimbIO() {
 
 				});
-				algae = new Algae();
+				algae = new Algae(new AlgaeIO() {
+
+				});
 			}
 
 			default -> {
@@ -156,7 +166,9 @@ public class RobotContainer {
 						driverFeedback);
 				climb = new Climb(new ClimbIO() {
 				});
-				algae = new Algae();
+				algae = new Algae(new AlgaeIO() {
+
+				});
 			}
 		}
 		stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
@@ -197,6 +209,7 @@ public class RobotContainer {
 
 		// Configure the button bindings
 		configureButtonBindings();
+		registerAutoCommands();
 	}
 
 	/**
@@ -247,6 +260,18 @@ public class RobotContainer {
 				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(45), coralSys.arm));
 		operatorController.y()
 				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(90), coralSys.arm));
+	}
+
+	private void registerAutoCommands() {
+		NamedCommands.registerCommand("AlignReefLeft", AlignmentCommands.alignToLeftReef(drive));
+		NamedCommands.registerCommand("AlignReefRight", AlignmentCommands.alignToLeftReef(drive));
+		NamedCommands.registerCommand("AlignCoralStation", AlignmentCommands.alignToCoralStation(drive));
+		NamedCommands.registerCommand("CoralStateL4", new InstantCommand(() -> coralSys.setCoralState(CoralState.kL4)));
+		NamedCommands.registerCommand("CoralStateL3", new InstantCommand(() -> coralSys.setCoralState(CoralState.kL3)));
+		NamedCommands.registerCommand("CoralStateL2", new InstantCommand(() -> coralSys.setCoralState(CoralState.kL2)));
+		NamedCommands.registerCommand("CoralStateL1", new InstantCommand(() -> coralSys.setCoralState(CoralState.kL1)));
+		NamedCommands.registerCommand("ReleaseCoral", new ReleaseCoral(coralSys));
+		NamedCommands.registerCommand("DelayUntilCoralIntake", new DelayUntilCoralIntake(coralSys));
 	}
 
 	/**

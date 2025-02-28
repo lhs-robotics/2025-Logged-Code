@@ -95,6 +95,9 @@ public class CoralSystem extends SubsystemBase {
             default -> throw new AssertionError();
         }
     }
+    public Trigger getAutoLoadTrigger() {
+        return autoLoadTrigger;
+    }
 
     public void disable() {
         elevator.disable();

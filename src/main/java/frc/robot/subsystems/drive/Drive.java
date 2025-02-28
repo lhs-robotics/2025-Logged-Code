@@ -362,7 +362,7 @@ public class Drive extends SubsystemBase {
 
     PathPlannerPath path = new PathPlannerPath(PathPlannerPath.waypointsFromPoses(getPose(), endPose), constraints, null,  new GoalEndState(MetersPerSecond.of(0), endPose.getRotation()));
 
-    Command pathfindingCommand = AutoBuilder.followPath(path);
-    return pathfindingCommand;
+    Command pathFollowingCommand = AutoBuilder.followPath(path);
+    return pathFollowingCommand;
   }
 }
