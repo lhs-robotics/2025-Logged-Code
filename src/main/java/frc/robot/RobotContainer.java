@@ -16,6 +16,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Algae.Algae;
 import frc.robot.subsystems.StateManager;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.ClimbIOSpark;
 import frc.robot.subsystems.coral.CoralSystem;
 import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.ArmIO;
@@ -88,7 +90,7 @@ public class RobotContainer {
 						drive::addVisionMeasurement,
 						new VisionIOLimelight(camera0Name, drive::getRotation),
 						new VisionIOLimelight(camera1Name, drive::getRotation));
-				climb = new Climb();
+				climb = new Climb(new ClimbIOSpark());
 				algae = new Algae();
 
 			}
@@ -115,7 +117,9 @@ public class RobotContainer {
 						new Elevator(new ElevatorIO() {
 						}),
 						driverFeedback);
-				climb = new Climb();
+				climb = new Climb(new ClimbIO() {
+
+				});
 				algae = new Algae();
 			}
 
@@ -141,7 +145,8 @@ public class RobotContainer {
 						new Elevator(new ElevatorIO() {
 						}),
 						driverFeedback);
-				climb = new Climb();
+				climb = new Climb(new ClimbIO() {
+				});
 				algae = new Algae();
 			}
 		}
@@ -243,6 +248,5 @@ public class RobotContainer {
 	public Command getAutonomousCommand() {
 		return autoChooser.get();
 	}
-
 
 }
