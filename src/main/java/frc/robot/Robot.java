@@ -21,6 +21,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 
+import com.pathplanner.lib.commands.FollowPathCommand;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -84,6 +88,8 @@ public class Robot extends LoggedRobot {
 
     // Start AdvantageKit logger
     Logger.start();
+
+    FollowPathCommand.warmupCommand().schedule();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -149,6 +155,15 @@ public class Robot extends LoggedRobot {
 
     robotContainer.stateManager.updateRobotState(Constants.teleopInitState);
 
+  }
+
+  /**
+   * Returns the alliance
+   * 
+   * @return true if the robot is on Red, false if the robot is on Blue
+   */
+  public static boolean onRedAlliance() {
+    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 
   /** This function is called periodically during operator control. */
