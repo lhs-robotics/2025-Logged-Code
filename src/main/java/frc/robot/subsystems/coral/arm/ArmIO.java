@@ -6,9 +6,11 @@ public interface ArmIO {
   @AutoLog
   public static class ArmIOInputs {
     public boolean connected = false;
-    public double height = 0;
-    public double velocityRPM = 0.0;
+    public double angle = 0;
+    public double gearboxVelocityRPM = 0.0;
     public boolean atTarget = false;
+
+    public double endAffectorMotorSpeed = 0;
   }
 
   public default void updateInputs(ArmIOInputs inputs) {
@@ -34,4 +36,6 @@ public interface ArmIO {
 
   public default void disableEndAffectorBrake() {
   }
+
+  public default void setEndAffectorSpeed(double speed) {}
 }

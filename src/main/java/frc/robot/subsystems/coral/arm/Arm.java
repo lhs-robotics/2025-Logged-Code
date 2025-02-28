@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.util.LoggedTunableNumber;
 
 public class Arm extends SubsystemBase {
@@ -143,16 +142,26 @@ public class Arm extends SubsystemBase {
     armIO.setVelocity(0);
   }
 
-  public void endAffectorIntakeEnable() {
 
+  // Sepereate commands for easy use in auto load routine
+  public void endAffectorIntakeEnable() {
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralIntakeSpeed);
+    armIO.setEndAffectorSpeed(ArmConstants.coralIntakeSpeed);
   }
   public void endAffectorIntakeDisable() {
-
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", 0);
+    armIO.setEndAffectorSpeed(0);
   }
 
   public Command releaseCoral() {
-    return new SequentialCommandGroup(new InstantCommand(), new WaitCommand(1), new InstantCommand());
+    return new SequentialCommandGroup(new InstantCommand(this::releaseCoralBegin), new WaitCommand(ArmConstants.coralReleaseTimeSecs), new InstantCommand(this::endAffectorIntakeDisable));
   }
+
+  private void releaseCoralBegin() {
+    Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralReleaseSpeed);
+    armIO.setEndAffectorSpeed(ArmConstants.coralReleaseSpeed);
+  }
+
 
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
