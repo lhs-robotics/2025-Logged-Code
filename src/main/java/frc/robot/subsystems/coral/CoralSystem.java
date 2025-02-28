@@ -59,27 +59,27 @@ public class CoralSystem extends SubsystemBase {
         switch (state) {
             case kStow -> {
                 elevator.setElevatorToLocation(elevatorPositions.homePosition);
-                arm.setArmToAngle(ArmPositions.homePosition);
+                arm.setArmToPosition(ArmPositions.homePosition);
             }
             case kL1 -> {
                 elevator.setElevatorToLocation(elevatorPositions.kLevel1);
-                arm.setArmToAngle(ArmPositions.kLevel1);
+                arm.setArmToPosition(ArmPositions.kLevel1);
             }
             case kL2 -> {
                 elevator.setElevatorToLocation(elevatorPositions.kLevel2);
-                arm.setArmToAngle(ArmPositions.kLevel2);
+                arm.setArmToPosition(ArmPositions.kLevel2);
             }
             case kL3 -> {
                 elevator.setElevatorToLocation(elevatorPositions.kLevel3);
-                arm.setArmToAngle(ArmPositions.kLevel3);
+                arm.setArmToPosition(ArmPositions.kLevel3);
             }
             case kL4 -> {
                 elevator.setElevatorToLocation(elevatorPositions.kLevel4);
-                arm.setArmToAngle(ArmPositions.kLevel4);
+                arm.setArmToPosition(ArmPositions.kLevel4);
             }
             case kPreLoad -> {
                 elevator.setElevatorToLocation(elevatorPositions.preLoadPosition);
-                arm.setArmToAngle(ArmPositions.loadPosition);
+                arm.setArmToPosition(ArmPositions.loadPosition);
 
                 if (CoralConstants.autoLoadEnabled) {
                     autoLoadCoral = true;
@@ -90,12 +90,12 @@ public class CoralSystem extends SubsystemBase {
     }
 
     public void disable() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'disable'");
+        elevator.disable();
+        arm.disable();
     }
 
     public void enable() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enable'");
+        elevator.enable();
+        arm.enable();
     }
 }

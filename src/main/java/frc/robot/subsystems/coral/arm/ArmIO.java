@@ -11,16 +11,27 @@ public interface ArmIO {
     public boolean atTarget = false;
   }
 
-  public default void updateInputs(ArmIOInputs inputs) {}
+  public default void updateInputs(ArmIOInputs inputs) {
+  }
 
-  public default void setArmAngleDegrees(double heightInches) {}
+  public default void setArmAngleDegrees(double heightInches) {
+  }
 
-  public default void runCharacterization(double output) {}
+  public default void runCharacterization(double output) {
+  }
 
-  public default void setVelocity(double velocity) {}
+  public default void setVelocity(double velocity) {
+  }
 
-  public default void setPositionPID(double kP, double kI, double kD) {}
+  public default void setPositionPID(double kP, double kI, double kD) {
+  }
 
-  public default void setMaxVelocityAcceleration(double velocity, double acceleration) {}
-  ;
+  public default void setMaxVelocityAcceleration(double velocity, double acceleration) {
+  }
+
+  public default void enableEndAffectorBrake() {
+  }
+
+  public default void disableEndAffectorBrake() {
+  }
 }

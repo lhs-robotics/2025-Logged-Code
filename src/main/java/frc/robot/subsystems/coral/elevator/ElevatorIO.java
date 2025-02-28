@@ -18,6 +18,10 @@ public interface ElevatorIO {
 
   public default void updateInputs(ElevatorIOInputs inputs) {}
 
+  public default void enableBreak() {}
+
+  public default void disableBreak(){}
+
   public default void setElevatorHeightInches(double heightInches) {}
 
   public default void runCharacterization(double output) {}

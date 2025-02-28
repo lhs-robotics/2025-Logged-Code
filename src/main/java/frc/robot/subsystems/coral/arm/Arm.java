@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.util.LoggedTunableNumber;
 
 public class Arm extends SubsystemBase {
@@ -91,7 +92,7 @@ public class Arm extends SubsystemBase {
    *
    * @param position
    */
-  public void setArmToAngle(ArmPositions position) {
+  public void setArmToPosition(ArmPositions position) {
     switch (position) {
       case loadPosition -> setArmAngleDegrees(ArmConstants.loadAngle);
       case homePosition -> setArmAngleDegrees(ArmConstants.homeAngle);
@@ -168,6 +169,17 @@ public class Arm extends SubsystemBase {
   private void runCharacterization(double output) {
     armIO.runCharacterization(output);
   }
+
+public void disable() {
+    setArmToPosition(ArmPositions.homePosition);
+    endAffectorIntakeDisable();
+    armIO.disableEndAffectorBrake();
+}
+
+public void enable() {
+  setArmToPosition(ArmPositions.loadPosition);
+  armIO.enableEndAffectorBrake();
+}
 
   
 }
