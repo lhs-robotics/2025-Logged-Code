@@ -11,10 +11,18 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.filter.Debouncer;
+import static frc.robot.util.SparkUtil.ifOk;
+import static frc.robot.util.SparkUtil.sparkStickyFault;
+
 public class ClimbIOSpark implements ClimbIO {
     private SparkMax climbMotor;
     private SparkClosedLoopController PIDController;
     private RelativeEncoder encoder;
+
+    private final Debouncer connectedDebounce = new Debouncer(0.5);
+
+    private double targetDegrees = 0;
 
     public ClimbIOSpark() {
         climbMotor = new SparkMax(ClimbConstants.climbMotorID, MotorType.kBrushless);
@@ -50,15 +58,26 @@ public class ClimbIOSpark implements ClimbIO {
 
     @Override
     public void setPositionDegrees(double angle) {
-        // Use MaxMotion PID which relies on restricting velocity rather than seeking to get to a certain point
-        // This means more power when actually climbing and less power when just moving inside bumper
+        // Use MaxMotion PID which relies on restricting velocity rather than seeking to
+        // get to a certain point
+        // This means more power when actually climbing and less power when just moving
+        // inside bumper
+        targetDegrees = angle;
         PIDController.setReference(angle, ControlType.kMAXMotionPositionControl);
+    }
+
+    public boolean checkAtTarget() {
+        double currPos = encoder.getPosition();
+        return Math.abs(targetDegrees - currPos) < ClimbConstants.allowedError;
     }
 
     @Override
     public void updateInputs(ClimbIOInputs inputs) {
-        // TODO Auto-generated method stub
-        ClimbIO.super.updateInputs(inputs);
+        sparkStickyFault = false;
+        ifOk(climbMotor, encoder::getPosition, (value) -> inputs.positionDegrees = value);
+        ifOk(climbMotor, encoder::getVelocity, (value) -> inputs.velocityRPM = value);
+        inputs.atTarget = checkAtTarget();
+        inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
     }
 
 }
