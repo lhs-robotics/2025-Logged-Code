@@ -38,6 +38,7 @@ import frc.robot.subsystems.coral.indexer.IndexerIO;
 import frc.robot.subsystems.coral.indexer.IndexerIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
@@ -62,7 +63,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  */
 public class RobotContainer {
 	// Subsystems
-	private final Drive drive;
+	public final Drive drive;
 	private final Vision vision;
 	private final CoralSystem coralSys;
 	private final DriverFeedback driverFeedback;
@@ -73,6 +74,7 @@ public class RobotContainer {
 	// Controller
 	private final CommandXboxController driveController = new CommandXboxController(0);
 	private final CommandXboxController operatorController = new CommandXboxController(1);
+	private final CommandXboxController testController = new CommandXboxController(3);
 
 	// Dashboard inputs
 	private final LoggedDashboardChooser<Command> autoChooser;
@@ -85,26 +87,53 @@ public class RobotContainer {
 
 		switch (Constants.currentMode) {
 			case REAL -> {
-				// Real robot, instantiate hardware IO implementations
-				drive = new Drive(
-						new GyroIO() {
-						},
+				
+				// Replayed robot, disable IO implementations
+			drive = new Drive(
+						new GyroIOPigeon2(),
 						new ModuleIOSpark(0),
 						new ModuleIOSpark(1),
 						new ModuleIOSpark(2),
 						new ModuleIOSpark(3));
+				vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+				}, new VisionIO() {
+				});
 				coralSys = new CoralSystem(
-						new Arm(new ArmIOSpark()),
-						new Elevator(new ElevatorIOSpark()), new Indexer(new IndexerIOSpark()),
-						driverFeedback);
-				vision = new Vision(
-						drive::addVisionMeasurement,
-						new VisionIOLimelight(camera0Name, drive::getRotation),
-						new VisionIOLimelight(camera1Name, drive::getRotation));
-				climb = new Climb(new ClimbIOSpark());
-				algae = new Algae(new AlgaeIOSpark());
+						new Arm(new ArmIO() {
+						}),
+						new Elevator(new ElevatorIOSpark() {
+						}),
+						new Indexer(new IndexerIO() {
 
+						}),
+						driverFeedback);
+				climb = new Climb(new ClimbIOSpark());
+				algae = new Algae(new AlgaeIO() {
+
+				});
 			}
+	
+			// case REAL -> {
+			// 	// Real robot, instantiate hardware IO implementations
+			// 	drive = new Drive(
+			// 			new GyroIO() {
+			// 			},
+			// 			new ModuleIOSpark(0),
+			// 			new ModuleIOSpark(1),
+			// 			new ModuleIOSpark(2),
+			// 			new ModuleIOSpark(3));
+			// 	coralSys = new CoralSystem(
+			// 			new Arm(new ArmIOSpark()),
+			// 			new Elevator(new ElevatorIOSpark()), new Indexer(new IndexerIOSpark()),
+			// 			driverFeedback);
+			// 	vision = new Vision(
+			// 			drive::addVisionMeasurement,
+			// 			new VisionIOLimelight(camera0Name, drive::getRotation),
+			// 			new VisionIOLimelight(camera1Name, drive::getRotation));
+			// 	climb = new Climb(new ClimbIOSpark());
+			// 	algae = new Algae(new AlgaeIOSpark());
+
+			// }
 
 			case SIM -> {
 				// Sim robot, instantiate physics sim IO implementations
@@ -221,6 +250,7 @@ public class RobotContainer {
 	 * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
 	 */
 	private void configureButtonBindings() {
+		System.out.println("BINDINGS CONFIGURED");
 		// Default command, normal field-relative drive
 		drive.setDefaultCommand(
 				DriveCommands.joystickDrive(
@@ -228,9 +258,7 @@ public class RobotContainer {
 						() -> -driveController.getLeftY(),
 						() -> -driveController.getLeftX(),
 						() -> -driveController.getRightX()));
-		// TEST COMMAND
-		drive.setDefaultCommand(
-				DriveCommands.driveStraightForwardBack(drive, () -> driveController.getLeftY()));
+
 		// Lock to 0° when A button is held
 		driveController
 				.a()
@@ -244,8 +272,8 @@ public class RobotContainer {
 		// Switch to X pattern when X button is pressed
 		driveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-		// Reset gyro to 0° when B button is pressed
-		driveController
+			// Reset gyro to 0° when B button is pressed
+			driveController
 				.b()
 				.onTrue(
 						Commands.runOnce(
@@ -260,6 +288,9 @@ public class RobotContainer {
 				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(45), coralSys.arm));
 		operatorController.y()
 				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(90), coralSys.arm));
+
+		testController.a().onTrue(Commands.runOnce(() -> climb.setClimbOutBumper(), climb));
+		testController.b().onTrue(Commands.runOnce(() -> climb.setClimbInBumper(), climb));
 	}
 
 	private void registerAutoCommands() {

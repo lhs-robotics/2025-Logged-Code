@@ -22,7 +22,7 @@ public class ElevatorConstants {
   public static final double positionI = 0;
   public static final double positionD = 0;
 
-  public static final double positionConversionFactor = 0;
+  public static final double positionConversionFactor = 1;
 
   public static final double maxVelocity = 0;
   public static final double maxAcceleration = 0;

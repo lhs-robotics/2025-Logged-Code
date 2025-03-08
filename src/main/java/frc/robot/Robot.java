@@ -154,7 +154,7 @@ public class Robot extends LoggedRobot {
     }
 
     robotContainer.stateManager.updateRobotState(Constants.teleopInitState);
-
+    robotContainer.drive.updateAbsValues();
   }
 
   /**

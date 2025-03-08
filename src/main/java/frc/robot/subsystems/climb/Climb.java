@@ -14,6 +14,7 @@ public class Climb extends SubsystemBase {
     }
 
     public void setClimbOutBumper() {
+        System.out.println("CLIMB");
         climbIO.setPositionDegrees(ClimbConstants.insideBumperAngle);
     }
 
@@ -21,6 +22,8 @@ public class Climb extends SubsystemBase {
      * Moves climb inside of bumpers - uses PID to either climb with high force or just pop in
      */
     public void setClimbInBumper() {
+        System.out.println("CLIMB");
+
         climbIO.setPositionDegrees(ClimbConstants.outsideBumperAngle);
 
     }
