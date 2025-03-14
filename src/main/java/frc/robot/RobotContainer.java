@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -30,9 +33,11 @@ import frc.robot.subsystems.coral.CoralSystem;
 import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.ArmIO;
 import frc.robot.subsystems.coral.arm.ArmIOSpark;
+import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.ElevatorIO;
 import frc.robot.subsystems.coral.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
 import frc.robot.subsystems.coral.indexer.Indexer;
 import frc.robot.subsystems.coral.indexer.IndexerIO;
 import frc.robot.subsystems.coral.indexer.IndexerIOSpark;
@@ -69,7 +74,7 @@ public class RobotContainer {
 	private final DriverFeedback driverFeedback;
 	private final Climb climb;
 	private final Algae algae;
-	public final StateManager stateManager;
+	// public final StateManager stateManager;
 
 	// Controller
 	private final CommandXboxController driveController = new CommandXboxController(0);
@@ -87,9 +92,9 @@ public class RobotContainer {
 
 		switch (Constants.currentMode) {
 			case REAL -> {
-				
+
 				// Replayed robot, disable IO implementations
-			drive = new Drive(
+				drive = new Drive(
 						new GyroIOPigeon2(),
 						new ModuleIOSpark(0),
 						new ModuleIOSpark(1),
@@ -99,8 +104,7 @@ public class RobotContainer {
 				}, new VisionIO() {
 				});
 				coralSys = new CoralSystem(
-						new Arm(new ArmIO() {
-						}),
+						new Arm(new ArmIOSpark()),
 						new Elevator(new ElevatorIOSpark() {
 						}),
 						new Indexer(new IndexerIO() {
@@ -112,26 +116,26 @@ public class RobotContainer {
 
 				});
 			}
-	
+
 			// case REAL -> {
-			// 	// Real robot, instantiate hardware IO implementations
-			// 	drive = new Drive(
-			// 			new GyroIO() {
-			// 			},
-			// 			new ModuleIOSpark(0),
-			// 			new ModuleIOSpark(1),
-			// 			new ModuleIOSpark(2),
-			// 			new ModuleIOSpark(3));
-			// 	coralSys = new CoralSystem(
-			// 			new Arm(new ArmIOSpark()),
-			// 			new Elevator(new ElevatorIOSpark()), new Indexer(new IndexerIOSpark()),
-			// 			driverFeedback);
-			// 	vision = new Vision(
-			// 			drive::addVisionMeasurement,
-			// 			new VisionIOLimelight(camera0Name, drive::getRotation),
-			// 			new VisionIOLimelight(camera1Name, drive::getRotation));
-			// 	climb = new Climb(new ClimbIOSpark());
-			// 	algae = new Algae(new AlgaeIOSpark());
+			// // Real robot, instantiate hardware IO implementations
+			// drive = new Drive(
+			// new GyroIO() {
+			// },
+			// new ModuleIOSpark(0),
+			// new ModuleIOSpark(1),
+			// new ModuleIOSpark(2),
+			// new ModuleIOSpark(3));
+			// coralSys = new CoralSystem(
+			// new Arm(new ArmIOSpark()),
+			// new Elevator(new ElevatorIOSpark()), new Indexer(new IndexerIOSpark()),
+			// driverFeedback);
+			// vision = new Vision(
+			// drive::addVisionMeasurement,
+			// new VisionIOLimelight(camera0Name, drive::getRotation),
+			// new VisionIOLimelight(camera1Name, drive::getRotation));
+			// climb = new Climb(new ClimbIOSpark());
+			// algae = new Algae(new AlgaeIOSpark());
 
 			// }
 
@@ -200,11 +204,12 @@ public class RobotContainer {
 				});
 			}
 		}
-		stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
+		// stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
 
 		// Set up auto routines
 		autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
+		autoChooser.addOption("DumbDriveOffLine", DriveCommands.driveOffLine(drive).withTimeout(2.5)
+				.andThen(DriveCommands.joystickDrive(drive, () -> 0, () -> 0, () -> 0)));
 		// Set up SysId routines
 		autoChooser.addOption(
 				"Drive Wheel Radius Characterization",
@@ -272,8 +277,12 @@ public class RobotContainer {
 		// Switch to X pattern when X button is pressed
 		driveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-			// Reset gyro to 0° when B button is pressed
-			driveController
+		driveController.rightBumper()
+				.whileTrue(Commands.startEnd(() -> climb.climbWellHeldStart(true), () -> climb.stopClimb(), climb));
+		driveController.leftBumper()
+				.whileTrue(Commands.startEnd(() -> climb.climbWellHeldStart(false), () -> climb.stopClimb(), climb));
+		// Reset gyro to 0° when B button is pressed
+		driveController
 				.b()
 				.onTrue(
 						Commands.runOnce(
@@ -283,14 +292,35 @@ public class RobotContainer {
 												new Rotation2d())),
 								drive)
 								.ignoringDisable(true));
-		operatorController.a().onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(0), coralSys.arm));
-		operatorController.x()
-				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(45), coralSys.arm));
-		operatorController.y()
-				.onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(90), coralSys.arm));
-
-		testController.a().onTrue(Commands.runOnce(() -> climb.setClimbOutBumper(), climb));
-		testController.b().onTrue(Commands.runOnce(() -> climb.setClimbInBumper(), climb));
+		
+		// operatorController.y().whileTrue(coralSys.elevator.manualElevatorUpCommand());
+		// operatorController.a().whileTrue(coralSys.elevator.manualElevatorDownCommand());
+		// operatorController.x().whileTrue(coralSys.arm.dumbManualArmDown());
+		// operatorController.b().whileTrue(coralSys.arm.dumbManualArmUp());
+		// operatorController.y().onTrue(Commands.runOnce(() ->
+		// coralSys.arm.setArmAngleDegrees(0), coralSys.arm));
+		// operatorController.x()
+		// .onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(45),
+		// coralSys.arm));
+		// operatorController.y()
+		// .onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(90),
+		// coralSys.arm));
+		// operatorController.y().onTrue(new ParallelCommandGroup(Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.kLevel4), coralSys.elevator), new SequentialCommandGroup(new WaitCommand(2), Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel4)))));
+		// operatorController.rightTrigger(0.75).onTrue(Commands.run(()-> coralSys.arm.releaseCoral(), coralSys.arm));
+		// operatorController.leftBumper().onTrue(new ParallelCommandGroup(Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.loadPosition), coralSys.arm),new SequentialCommandGroup(new WaitCommand(2), Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.preLoadPosition), coralSys.elevator))));
+		// testController.a().whileTrue(coralSys.elevator.manualElevatorUpCommand());
+		testController.a().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(1), coralSys.elevator));
+		testController.b().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(3), coralSys.elevator));
+		testController.x().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(5), coralSys.elevator));
+		testController.y().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(10), coralSys.elevator));
+		testController.rightBumper().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(15), coralSys.elevator));
+		testController.leftBumper().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
+		operatorController.a().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
+		operatorController.b().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
+		// testController.x().whileTrue(coralSys.arm.dumbManualArmUp());
+		// testController.b().whileTrue(coralSys.arm.dumbManualArmDown());
+		// testController.leftTrigger(.75).whileTrue(Commands.startEnd(()->coralSys.arm.endAffectorIntakeEnable(), ()->coralSys.arm.endAffectorIntakeDisable(), coralSys.arm));
+		// testController.rightTrigger(.75).onTrue(coralSys.arm.releaseCoral());
 	}
 
 	private void registerAutoCommands() {

@@ -40,7 +40,6 @@ public class ElevatorIOSpark implements ElevatorIO {
     motor2 = new SparkMax(ElevatorConstants.motor2ID, MotorType.kBrushless);
 
     // Spark Max built in relative encoder - position is 0 at startup
-    encoder = motor1.getEncoder();
 
     // Sparkle Maximum built in PID Controller
     elevatorController = motor1.getClosedLoopController();
@@ -57,14 +56,16 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     // Converts from motor rotation to height gained in inches
     // TODO: CALCULATE THIS CONVERSION FACTOR
+
     motorConfig.encoder.positionConversionFactor(ElevatorConstants.positionConversionFactor);
+    motorConfig.encoder.velocityConversionFactor(ElevatorConstants.positionConversionFactor);
 
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Position Control PID
-        .p(ElevatorConstants.positionP)
-        .i(ElevatorConstants.positionI)
-        .d(ElevatorConstants.positionD)
+        .p(ElevatorConstants.positionP, ClosedLoopSlot.kSlot0)
+        .i(ElevatorConstants.positionI, ClosedLoopSlot.kSlot0)
+        .d(ElevatorConstants.positionD, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1);
     motorConfig.closedLoop
         .p(ElevatorConstants.velocityP, ClosedLoopSlot.kSlot1)
@@ -72,17 +73,26 @@ public class ElevatorIOSpark implements ElevatorIO {
         .d(ElevatorConstants.velocityD, ClosedLoopSlot.kSlot1);
 
     motorConfig.closedLoop.maxMotion
-        // These are the speeds max motion will attempt to achieve (not maximum it will
-        // go to, what it will always go to )
-        .maxVelocity(ElevatorConstants.maxVelocity)
-        .maxAcceleration(ElevatorConstants.maxAcceleration)
-        .allowedClosedLoopError(ElevatorConstants.allowedError);
+    // // These are the speeds max motion will attempt to achieve (not maximum it
+    // will
+    // // go to, what it will always go to )
+    .maxVelocity(ElevatorConstants.maxVelocity)
+    .maxAcceleration(ElevatorConstants.maxAcceleration)
+    .allowedClosedLoopError(ElevatorConstants.allowedError);
 
-    motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+    SparkMaxConfig motorBConfig = new SparkMaxConfig();
+    motorBConfig
+        .idleMode(IdleMode.kBrake)
+        .smartCurrentLimit(ElevatorConstants.elevatorMotorSmartCurrentLimit)
+        .voltageCompensation(12.0)
+        .inverted(ElevatorConstants.elevatorMotor2Inverted)
+        .follow(motor1);
     // Modify motor config for motor 2
-    motorConfig.inverted(ElevatorConstants.elevatorMotor2Inverted).follow(motor1);
-    motor2.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    motor2.configure(motorBConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    encoder = motor1.getEncoder();
 
     // Elevator Boot Location is 0
     encoder.setPosition(0);
@@ -114,6 +124,7 @@ public class ElevatorIOSpark implements ElevatorIO {
     return Math.abs(heighSetpoint - currPos) < ElevatorConstants.allowedError;
   }
 
+  @Override
   /** Sets elevator height from elevator bootup 0 (not robot base) */
   public void setElevatorHeightInches(double heightInches) {
     // Feedforward compensates for gravity - even if it is not moving the motor
@@ -126,7 +137,7 @@ public class ElevatorIOSpark implements ElevatorIO {
     heighSetpoint = heightInches;
 
     elevatorController.setReference(
-        heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, feedforward);
+        heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0);
   }
 
   /**
@@ -147,8 +158,8 @@ public class ElevatorIOSpark implements ElevatorIO {
    */
   @Override
   public void setVelocity(double velocity) {
-    elevatorController.setReference(
-        velocity, ControlType.kMAXMotionVelocityControl, ClosedLoopSlot.kSlot1);
+    // elevatorController.setReference(
+    // velocity, ControlType.kMAXMotionVelocityControl, ClosedLoopSlot.kSlot1);
     // TODO: ADD PROTECTION FROM HITTING TOP OR BOTTOM
   }
 
@@ -163,11 +174,12 @@ public class ElevatorIOSpark implements ElevatorIO {
    */
   @Override
   public void setMaxVelocityAcceleration(double velocity, double acceleration) {
-    SparkMaxConfig newConfig = new SparkMaxConfig();
+    // SparkMaxConfig newConfig = new SparkMaxConfig();
 
-    newConfig.closedLoop.maxMotion.maxVelocity(velocity).maxAcceleration(acceleration);
+    // newConfig.closedLoop.maxMotion.maxVelocity(velocity).maxAcceleration(acceleration);
 
-    motor1.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    // motor1.configure(newConfig, ResetMode.kResetSafeParameters,
+    // PersistMode.kNoPersistParameters);
   }
 
   /**
@@ -175,16 +187,33 @@ public class ElevatorIOSpark implements ElevatorIO {
    */
   @Override
   public void setPositionPID(double kP, double kI, double kD) {
-    SparkMaxConfig newConfig = new SparkMaxConfig();
+    // SparkMaxConfig newConfig = new SparkMaxConfig();
 
-    newConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        // Position Control PID
-        .p(ElevatorConstants.positionP)
-        .i(ElevatorConstants.positionI)
-        .d(ElevatorConstants.positionD)
-        .outputRange(-1, 1);
+    // newConfig.closedLoop
+    // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+    // // Position Control PID
+    // .p(ElevatorConstants.positionP)
+    // .i(ElevatorConstants.positionI)
+    // .d(ElevatorConstants.positionD)
+    // .outputRange(-1, 1);
 
-    motor1.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    // motor1.configure(newConfig, ResetMode.kResetSafeParameters,
+    // PersistMode.kNoPersistParameters);
   }
+
+  @Override
+  public void manualElevatorStart(boolean up) {
+    if (up) {
+      motor1.set(0.40);
+    } else {
+      motor1.set(-0.40);
+    }
+  }
+
+  @Override
+  public void manualElevatorStop() {
+    motor1.set(0);
+    elevatorController.setReference(encoder.getPosition(), ControlType.kPosition);
+  }
+
 }

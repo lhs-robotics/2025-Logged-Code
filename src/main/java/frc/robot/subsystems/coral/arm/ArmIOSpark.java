@@ -79,7 +79,7 @@ public class ArmIOSpark implements ArmIO {
     @Override
     public void setArmAngleDegrees(double angleDegrees) {
         angleSetpoint = angleDegrees;
-        gearboxPID.setReference(angleDegrees, ControlType.kPosition);
+        // gearboxPID.setReference(angleDegrees, ControlType.kPosition);
     }
 
     @Override
@@ -130,5 +130,24 @@ public class ArmIOSpark implements ArmIO {
     public void setEndAffectorSpeed(double speed) {
         endAffectorMotor.set(speed);
     }
+
+    @Override
+    public void manualRunArm(boolean up) {
+        if (up){
+            gearboxSpark.set(0.2);
+        } else {
+            gearboxSpark.set(-0.2);
+        }
+    }
+
+    @Override
+    public void manualArmStop() {
+        gearboxSpark.set(0);
+        gearboxPID.setReference(gearboxEncoder.getPosition(), ControlType.kPosition);
+    }
+
+    
+
+    
 
 }

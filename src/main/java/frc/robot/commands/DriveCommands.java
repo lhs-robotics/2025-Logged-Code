@@ -90,6 +90,34 @@ public class DriveCommands {
         drive);
   }
 
+  public static Command driveOffLine(
+      Drive drive) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks(-0.6,
+              0);
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(0, DEADBAND);
+
+          // Square rotation value for more precise control
+          omega = Math.copySign(omega * omega, omega);
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds = new ChassisSpeeds(
+              linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+              linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+              omega * drive.getMaxAngularSpeedRadPerSec());
+
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  drive.getRotation()));
+        },
+        drive);
+  }
+
   /**
    * Drive Straight
    */

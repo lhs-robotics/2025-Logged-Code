@@ -39,23 +39,39 @@ public class ClimbIOSpark implements ClimbIO {
         motorConfig.encoder.positionConversionFactor(ClimbConstants.positionConversionFactor);
         motorConfig.encoder.velocityConversionFactor(ClimbConstants.velocityConversionFactor);
 
-        motorConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                // Position Control PID
-                .p(ClimbConstants.positionP)
-                .i(ClimbConstants.positionI)
-                .d(ClimbConstants.positionD)
-                .outputRange(-1, 1);
+        // motorConfig.closedLoop
+        //         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        //         // Position Control PID
+        //         .p(ClimbConstants.positionP)
+        //         .i(ClimbConstants.positionI)
+        //         .d(ClimbConstants.positionD)
+        //         .outputRange(-1, 1);
 
-        motorConfig.closedLoop.maxMotion
-                // These are the speeds max motion will attempt to achieve (not maximum it will
-                // go to, what it will always go to )
-                .maxVelocity(ClimbConstants.maxVelocity)
-                .maxAcceleration(ClimbConstants.maxAcceleration)
-                .allowedClosedLoopError(ClimbConstants.allowedError);
+        // motorConfig.closedLoop.maxMotion
+        //         // These are the speeds max motion will attempt to achieve (not maximum it will
+        //         // go to, what it will always go to )
+        //         .maxVelocity(ClimbConstants.maxVelocity)
+        //         .maxAcceleration(ClimbConstants.maxAcceleration)
+        //         .allowedClosedLoopError(ClimbConstants.allowedError);
 
         PIDController = climbMotor.getClosedLoopController();
         encoder = climbMotor.getEncoder();
+    }
+
+    @Override
+    public void runClimb(boolean movingIn) {
+        if (movingIn) {
+            climbMotor.set(0.85);
+
+        } else {
+            climbMotor.set(-0.85);
+
+        }
+    }
+
+    @Override
+    public void stopClimb() {
+       climbMotor.set(0);
     }
 
     @Override
@@ -65,7 +81,7 @@ public class ClimbIOSpark implements ClimbIO {
         // This means more power when actually climbing and less power when just moving
         // inside bumper
         targetDegrees = angle;
-        PIDController.setReference(angle, ControlType.kPosition);
+        // PIDController.setReference(angle, ControlType.kPosition);
     }
 
     public boolean checkAtTarget() {

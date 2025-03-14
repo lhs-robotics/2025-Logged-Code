@@ -28,6 +28,13 @@ public class Climb extends SubsystemBase {
 
     }
 
+    public void climbWellHeldStart(boolean climbingIn){
+        climbIO.runClimb(climbingIn);
+    }
+    public void stopClimb(){
+        climbIO.stopClimb();
+    }
+
     @Override
     public void periodic() {
         climbIO.updateInputs(climbInputs);

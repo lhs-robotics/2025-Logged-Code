@@ -22,7 +22,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-        public static final double maxSpeedMetersPerSec = 4.8;
+        public static final double maxSpeedMetersPerSec = 5.0;
         public static final double odometryFrequency = 100.0; // Hz
         public static final double trackWidth = Units.inchesToMeters(23.750);
         public static final double wheelBase = Units.inchesToMeters(23.750);
@@ -35,10 +35,10 @@ public class DriveConstants {
         };
 
         // Zeroed rotation values for each module, see setup instructions
-        public static final double frontLeftZeroRotation = -0.412354;
-        public static final double frontRightZeroRotation = 0.121582;
-        public static final double backLeftZeroRotation = -0.195312;
-        public static final double backRightZeroRotation = 0.031006;
+        public static final double frontLeftZeroRotation = -0.435791;
+        public static final double frontRightZeroRotation = 0.113037;
+        public static final double backLeftZeroRotation = -0.183105;
+        public static final double backRightZeroRotation = 0.041748;
 
         // Device CAN IDs
         public static final int pigeonCanId = 9;
@@ -65,7 +65,7 @@ public class DriveConstants {
         public static final DCMotor driveGearbox = DCMotor.getNEO(1);
 
         // Drive encoder configuration
-        public static final double driveEncoderPositionFactor = 2 * Math.PI * driveMotorReduction; // Rotor Rotations ->
+        public static final double driveEncoderPositionFactor = (2 * Math.PI) / driveMotorReduction; // Rotor Rotations ->
                                                                                                    // Wheel Radians
         public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM
                                                                                                             // ->
@@ -73,7 +73,7 @@ public class DriveConstants {
                                                                                                             // Rad/Sec
 
         // Drive PID configuration
-        public static final double driveKp = 0.001;
+        public static final double driveKp = 0.01;
         public static final double driveKd = 0.0;
         public static final double driveKs = 0.0;
         public static final double driveKv = 0.1;
@@ -111,8 +111,8 @@ public class DriveConstants {
         public static SensorDirectionValue backRightAbsSensorDir = SensorDirectionValue.CounterClockwise_Positive;
 
         // Turn PID configuration
-        public static final double turnKp = 1.2;
-        public static final double turnKd = 0.0;
+        public static final double turnKp = 1.1;
+        public static final double turnKd = 0.1;
         public static final double turnSimP = 8.0;
         public static final double turnSimD = 0.0;
         public static final double turnPIDMinInput = -Math.PI; // Radians

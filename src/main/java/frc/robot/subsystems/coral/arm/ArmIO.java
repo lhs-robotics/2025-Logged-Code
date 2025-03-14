@@ -16,6 +16,13 @@ public interface ArmIO {
   public default void updateInputs(ArmIOInputs inputs) {
   }
 
+  public default void manualArmStop() {
+
+  }
+
+  public default void manualRunArm(boolean up) {
+  };
+
   public default void setArmAngleDegrees(double heightInches) {
   }
 
@@ -37,5 +44,6 @@ public interface ArmIO {
   public default void disableEndAffectorBrake() {
   }
 
-  public default void setEndAffectorSpeed(double speed) {}
+  public default void setEndAffectorSpeed(double speed) {
+  }
 }
