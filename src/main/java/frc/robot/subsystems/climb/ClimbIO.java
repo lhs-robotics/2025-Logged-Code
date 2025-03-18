@@ -10,7 +10,10 @@ public interface ClimbIO {
         public double velocityRPM = 0.0;
         public boolean atTarget = false;
     }
-
+    public default void stopClimb() {
+    }
+    public default void runClimb(boolean movingIn){
+    }
     public default void setPositionDegrees(double angle) {
     }
 

@@ -27,14 +27,14 @@ import frc.robot.subsystems.drive.DriveConstants;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.2;
-  private static final double ANGLE_KP = 5.0;
-  private static final double ANGLE_KD = 0.4;
-  private static final double ANGLE_MAX_VELOCITY = 8.0;
-  private static final double ANGLE_MAX_ACCELERATION = 20.0;
+  private static final double ANGLE_KP = 14;
+  private static final double ANGLE_KD = 0.1;
+  private static final double ANGLE_MAX_VELOCITY = 30.0;
+  private static final double ANGLE_MAX_ACCELERATION = 40.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
-  private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
-  private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  private static final double WHEEL_RADIUS_MAX_VELOCITY = 2; // Rad/Sec
+  private static final double WHEEL_RADIUS_RAMP_RATE = 0.75; // Rad/Sec^2
 
   private DriveCommands() {
   }
@@ -87,6 +87,34 @@ public class DriveCommands {
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));
+        },
+        drive);
+  }
+
+  public static Command driveOffLine(
+      Drive drive) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks(-0.6,
+              0);
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(0, DEADBAND);
+
+          // Square rotation value for more precise control
+          omega = Math.copySign(omega * omega, omega);
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds = new ChassisSpeeds(
+              linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+              linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+              omega * drive.getMaxAngularSpeedRadPerSec());
+
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  drive.getRotation()));
         },
         drive);
   }

@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -104,7 +105,12 @@ public class Arm extends SubsystemBase {
       }
     }
   }
-
+  public Command dumbManualArmUp() {
+    return Commands.startEnd(()->armIO.manualRunArm(true), ()->armIO.manualArmStop(), this);
+  }
+  public Command dumbManualArmDown() {
+    return Commands.startEnd(()->armIO.manualRunArm(false), ()->armIO.manualArmStop(), this);
+  }
   /**
    * @return Returns if arm is within accaptable error margin of PID setpoint (FOR
    *         ANGLE)

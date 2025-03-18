@@ -15,7 +15,10 @@ public interface ElevatorIO {
     public boolean atTarget = false;
     // TODO: ADD CARRIAGE VELOCITY
   }
+  public default void manualElevatorStart(boolean up) {
 
+  }
+  public default void manualElevatorStop() {}
   public default void updateInputs(ElevatorIOInputs inputs) {}
 
   public default void enableBreak() {}

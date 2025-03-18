@@ -5,10 +5,12 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.filter.Debouncer;
@@ -16,7 +18,7 @@ import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 public class ClimbIOSpark implements ClimbIO {
-    private SparkMax climbMotor;
+    private SparkFlex climbMotor;
     private SparkClosedLoopController PIDController;
     private RelativeEncoder encoder;
 
@@ -25,8 +27,8 @@ public class ClimbIOSpark implements ClimbIO {
     private double targetDegrees = 0;
 
     public ClimbIOSpark() {
-        climbMotor = new SparkMax(ClimbConstants.climbMotorID, MotorType.kBrushless);
-        SparkMaxConfig motorConfig = new SparkMaxConfig();
+        climbMotor = new SparkFlex(ClimbConstants.climbMotorID, MotorType.kBrushless);
+        SparkFlexConfig motorConfig = new SparkFlexConfig();
 
         motorConfig
                 .idleMode(IdleMode.kBrake)
@@ -37,23 +39,39 @@ public class ClimbIOSpark implements ClimbIO {
         motorConfig.encoder.positionConversionFactor(ClimbConstants.positionConversionFactor);
         motorConfig.encoder.velocityConversionFactor(ClimbConstants.velocityConversionFactor);
 
-        motorConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                // Position Control PID
-                .p(ClimbConstants.positionP)
-                .i(ClimbConstants.positionI)
-                .d(ClimbConstants.positionD)
-                .outputRange(-1, 1);
+        // motorConfig.closedLoop
+        //         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        //         // Position Control PID
+        //         .p(ClimbConstants.positionP)
+        //         .i(ClimbConstants.positionI)
+        //         .d(ClimbConstants.positionD)
+        //         .outputRange(-1, 1);
 
-        motorConfig.closedLoop.maxMotion
-                // These are the speeds max motion will attempt to achieve (not maximum it will
-                // go to, what it will always go to )
-                .maxVelocity(ClimbConstants.maxVelocity)
-                .maxAcceleration(ClimbConstants.maxAcceleration)
-                .allowedClosedLoopError(ClimbConstants.allowedError);
+        // motorConfig.closedLoop.maxMotion
+        //         // These are the speeds max motion will attempt to achieve (not maximum it will
+        //         // go to, what it will always go to )
+        //         .maxVelocity(ClimbConstants.maxVelocity)
+        //         .maxAcceleration(ClimbConstants.maxAcceleration)
+        //         .allowedClosedLoopError(ClimbConstants.allowedError);
 
         PIDController = climbMotor.getClosedLoopController();
         encoder = climbMotor.getEncoder();
+    }
+
+    @Override
+    public void runClimb(boolean movingIn) {
+        if (movingIn) {
+            climbMotor.set(0.85);
+
+        } else {
+            climbMotor.set(-0.85);
+
+        }
+    }
+
+    @Override
+    public void stopClimb() {
+       climbMotor.set(0);
     }
 
     @Override
@@ -63,7 +81,7 @@ public class ClimbIOSpark implements ClimbIO {
         // This means more power when actually climbing and less power when just moving
         // inside bumper
         targetDegrees = angle;
-        PIDController.setReference(angle, ControlType.kMAXMotionPositionControl);
+        // PIDController.setReference(angle, ControlType.kPosition);
     }
 
     public boolean checkAtTarget() {

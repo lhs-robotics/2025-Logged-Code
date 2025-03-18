@@ -3,12 +3,9 @@ package frc.robot.subsystems.coral.elevator;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
-
-import java.time.Instant;
-
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -131,6 +128,14 @@ public class Elevator extends SubsystemBase {
     }
   }
 
+  public Command manualElevatorUpCommand() {
+    return Commands.startEnd(() -> elevatorIO.manualElevatorStart(true), () -> elevatorIO.manualElevatorStop(), this);
+  }
+
+  public Command manualElevatorDownCommand() {
+    return Commands.startEnd(() -> elevatorIO.manualElevatorStart(false), () -> elevatorIO.manualElevatorStop(), this);
+  }
+
   /**
    * @return Return if elevator is within accaptable error margin of POSITION, NOT
    *         VELOCITY, PID
@@ -207,7 +212,8 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/Velocity Setpoint", 0);
     setElevatorToLocation(elevatorPositions.homePosition);
     // Waot for elevator to get to target before turning off
-    atTargetHeight.onTrue(new SequentialCommandGroup(new InstantCommand(() -> elevatorIO.disableBreak(), this), new InstantCommand(() -> runVoltage(0), this)));
+    atTargetHeight.onTrue(new SequentialCommandGroup(new InstantCommand(() -> elevatorIO.disableBreak(), this),
+        new InstantCommand(() -> runVoltage(0), this)));
 
   }
 

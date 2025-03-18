@@ -133,6 +133,7 @@ public class Drive extends SubsystemBase {
             (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
         new SysIdRoutine.Mechanism(
             (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+            
   }
 
   @Override
@@ -216,6 +217,12 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+  }
+
+  public void updateAbsValues() {
+    for (int i = 0; i < 4; i++) {
+      modules[i].resetFromAbsolute();
+    }
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -338,8 +345,8 @@ public class Drive extends SubsystemBase {
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    // Todo: Replace w/ actual gyro
-    return new Rotation2d(0);
+
+    return getPose().getRotation();
   }
 
   /** Resets the current odometry pose. */
@@ -410,6 +417,7 @@ public class Drive extends SubsystemBase {
     if (Robot.onRedAlliance()) {
       path = path.flipPath();
     }
+
     Command pathFollowingCommand = AutoBuilder.followPath(path);
     return pathFollowingCommand;
   }

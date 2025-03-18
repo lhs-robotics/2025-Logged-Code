@@ -130,7 +130,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
-    robotContainer.stateManager.updateRobotState(Constants.autoInitState);
+    // robotContainer.stateManager.updateRobotState(Constants.autoInitState);
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
@@ -153,8 +153,8 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    robotContainer.stateManager.updateRobotState(Constants.teleopInitState);
-
+    // robotContainer.stateManager.updateRobotState(Constants.teleopInitState);
+    robotContainer.drive.updateAbsValues();
   }
 
   /**
