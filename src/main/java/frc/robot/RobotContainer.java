@@ -12,19 +12,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.auto.AlignmentCommands;
 import frc.robot.commands.coral.DelayUntilCoralIntake;
 import frc.robot.commands.coral.ReleaseCoral;
-import frc.robot.subsystems.StateManager;
 import frc.robot.subsystems.algae.Algae;
 import frc.robot.subsystems.algae.AlgaeIO;
-import frc.robot.subsystems.algae.AlgaeIOSpark;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSpark;
@@ -33,14 +28,11 @@ import frc.robot.subsystems.coral.CoralSystem;
 import frc.robot.subsystems.coral.arm.Arm;
 import frc.robot.subsystems.coral.arm.ArmIO;
 import frc.robot.subsystems.coral.arm.ArmIOSpark;
-import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.ElevatorIO;
 import frc.robot.subsystems.coral.elevator.ElevatorIOSpark;
-import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
 import frc.robot.subsystems.coral.indexer.Indexer;
 import frc.robot.subsystems.coral.indexer.IndexerIO;
-import frc.robot.subsystems.coral.indexer.IndexerIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -54,7 +46,6 @@ import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 import static frc.robot.subsystems.vision.VisionConstants.robotToCamera0;
 import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 /**
@@ -100,7 +91,7 @@ public class RobotContainer {
 						new ModuleIOSpark(1),
 						new ModuleIOSpark(2),
 						new ModuleIOSpark(3));
-				vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+				vision = new Vision(drive::addVisionMeasurement, drive::addLocalVisionMeasurement, new VisionIO() {
 				}, new VisionIO() {
 				});
 				coralSys = new CoralSystem(
@@ -293,7 +284,7 @@ public class RobotContainer {
 												new Rotation2d())),
 								drive)
 								.ignoringDisable(true));
-		
+
 		// operatorController.y().whileTrue(coralSys.elevator.manualElevatorUpCommand());
 		// operatorController.a().whileTrue(coralSys.elevator.manualElevatorDownCommand());
 		// operatorController.x().whileTrue(coralSys.arm.dumbManualArmDown());
@@ -306,21 +297,34 @@ public class RobotContainer {
 		// operatorController.y()
 		// .onTrue(Commands.runOnce(() -> coralSys.arm.setArmAngleDegrees(90),
 		// coralSys.arm));
-		// operatorController.y().onTrue(new ParallelCommandGroup(Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.kLevel4), coralSys.elevator), new SequentialCommandGroup(new WaitCommand(2), Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel4)))));
-		// operatorController.rightTrigger(0.75).onTrue(Commands.run(()-> coralSys.arm.releaseCoral(), coralSys.arm));
-		// operatorController.leftBumper().onTrue(new ParallelCommandGroup(Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.loadPosition), coralSys.arm),new SequentialCommandGroup(new WaitCommand(2), Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.preLoadPosition), coralSys.elevator))));
+		// operatorController.y().onTrue(new
+		// ParallelCommandGroup(Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.kLevel4),
+		// coralSys.elevator), new SequentialCommandGroup(new WaitCommand(2),
+		// Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel4)))));
+		// operatorController.rightTrigger(0.75).onTrue(Commands.run(()->
+		// coralSys.arm.releaseCoral(), coralSys.arm));
+		// operatorController.leftBumper().onTrue(new
+		// ParallelCommandGroup(Commands.run(()->coralSys.arm.setArmToPosition(ArmPositions.loadPosition),
+		// coralSys.arm),new SequentialCommandGroup(new WaitCommand(2),
+		// Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.preLoadPosition),
+		// coralSys.elevator))));
 		// testController.a().whileTrue(coralSys.elevator.manualElevatorUpCommand());
-		testController.a().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(1), coralSys.elevator));
-		testController.b().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(3), coralSys.elevator));
-		testController.x().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(5), coralSys.elevator));
-		testController.y().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(10), coralSys.elevator));
-		testController.rightBumper().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(15), coralSys.elevator));
-		testController.leftBumper().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
-		operatorController.a().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
-		operatorController.b().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
+		testController.a().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(1), coralSys.elevator));
+		testController.b().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(3), coralSys.elevator));
+		testController.x().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(5), coralSys.elevator));
+		testController.y().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(10), coralSys.elevator));
+		testController.rightBumper()
+				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(15), coralSys.elevator));
+		testController.leftBumper()
+				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
+		operatorController.a()
+				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
+		operatorController.b()
+				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
 		// testController.x().whileTrue(coralSys.arm.dumbManualArmUp());
 		// testController.b().whileTrue(coralSys.arm.dumbManualArmDown());
-		// testController.leftTrigger(.75).whileTrue(Commands.startEnd(()->coralSys.arm.endAffectorIntakeEnable(), ()->coralSys.arm.endAffectorIntakeDisable(), coralSys.arm));
+		// testController.leftTrigger(.75).whileTrue(Commands.startEnd(()->coralSys.arm.endAffectorIntakeEnable(),
+		// ()->coralSys.arm.endAffectorIntakeDisable(), coralSys.arm));
 		// testController.rightTrigger(.75).onTrue(coralSys.arm.releaseCoral());
 	}
 
