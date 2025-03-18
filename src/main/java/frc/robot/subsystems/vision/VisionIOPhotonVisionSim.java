@@ -22,6 +22,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.StateManager;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
@@ -40,8 +41,8 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
    */
   public VisionIOPhotonVisionSim(
       String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier, Supplier<Rotation2d> gyro,
-      StateManager stateManager) {
-    super(name, robotToCamera, gyro, stateManager);
+      RobotContainer container) {
+    super(name, robotToCamera, gyro, container);
     this.poseSupplier = poseSupplier;
 
     // Initialize vision sim

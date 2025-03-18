@@ -30,6 +30,7 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.StateManager;
 
 /** IO implementation for real PhotonVision hardware. */
@@ -38,7 +39,7 @@ public class VisionIOPhotonVision implements VisionIO {
   protected final Transform3d robotToCamera;
   protected final PhotonPoseEstimator localPoseEstimator;
   protected final Supplier<Rotation2d> botRotation;
-  private final StateManager stateManager;
+  private final RobotContainer container;
 
   /**
    * Creates a new VisionIOPhotonVision.
@@ -47,11 +48,11 @@ public class VisionIOPhotonVision implements VisionIO {
    * @param robotToCamera The 3D position of the camera relative to the robot.
    */
   public VisionIOPhotonVision(
-      String name, Transform3d robotToCamera, Supplier<Rotation2d> botRotation, StateManager stateManager) {
+      String name, Transform3d robotToCamera, Supplier<Rotation2d> botRotation, RobotContainer container) {
     camera = new PhotonCamera(name);
     this.robotToCamera = robotToCamera;
     this.botRotation = botRotation;
-    this.stateManager = stateManager;
+    this.container = container;
     localPoseEstimator = new PhotonPoseEstimator(
         AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape),
         PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
@@ -70,7 +71,7 @@ public class VisionIOPhotonVision implements VisionIO {
       if (result.hasTargets()) {
         var filteredTargets = result.targets.stream()
             .filter(
-                target -> target.fiducialId == stateManager.currentAprilTagTarget)
+                target -> target.fiducialId == container.aprilTagTarget)
             .collect(Collectors.toList());
         var filteredResult = new PhotonPipelineResult(
             result.metadata, filteredTargets, Optional.empty());

@@ -19,6 +19,7 @@ import frc.robot.commands.auto.AlignmentCommands;
 import frc.robot.commands.coral.DelayUntilCoralIntake;
 import frc.robot.commands.coral.LoadCoral;
 import frc.robot.commands.coral.ReleaseCoral;
+import frc.robot.subsystems.StateManager;
 import frc.robot.subsystems.algae.Algae;
 import frc.robot.subsystems.algae.AlgaeIO;
 import frc.robot.subsystems.climb.Climb;
@@ -66,7 +67,9 @@ public class RobotContainer {
 	private final DriverFeedback driverFeedback;
 	private final Climb climb;
 	private final Algae algae;
-	// public final StateManager stateManager;
+	public final StateManager stateManager;
+
+	public int aprilTagTarget = 0;
 
 	// Controller
 	private final CommandXboxController driveController = new CommandXboxController(0);
@@ -143,10 +146,8 @@ public class RobotContainer {
 				vision = new Vision(
 						drive::addVisionMeasurement,
 						drive::addLocalVisionMeasurement,
-						new VisionIOPhotonVisionSim(camera0Name, robotToCamera0,
-								drive::getPose),
-						new VisionIOPhotonVisionSim(camera1Name, robotToCamera1,
-								drive::getPose));
+						new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose, drive::getRotation,
+								this));
 
 				coralSys = new CoralSystem(
 						new Arm(new ArmIO() {
@@ -196,7 +197,7 @@ public class RobotContainer {
 				});
 			}
 		}
-		// stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
+		stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
 
 		// Set up auto routines
 		registerAutoCommands();
@@ -285,7 +286,6 @@ public class RobotContainer {
 								drive)
 								.ignoringDisable(true));
 
-
 		// operatorController.y().whileTrue(coralSys.elevator.manualElevatorUpCommand());
 		// operatorController.a().whileTrue(coralSys.elevator.manualElevatorDownCommand());
 		// operatorController.x().whileTrue(coralSys.arm.dumbManualArmDown());
@@ -329,14 +329,22 @@ public class RobotContainer {
 		// testController.rightTrigger(.75).onTrue(coralSys.arm.releaseCoral());
 
 		// operatorController.a().onTrue(
-		// 		Commands.runOnce(() -> coralSys.setCoralState(CoralState.kPreLoad), coralSys.elevator, coralSys.arm));
+		// Commands.runOnce(() -> coralSys.setCoralState(CoralState.kPreLoad),
+		// coralSys.elevator, coralSys.arm));
 		// operatorController.b().onTrue(new LoadCoral(coralSys, driverFeedback));
 		// operatorController.y()
-		// 		.onTrue(Commands.runOnce(() -> coralSys.setCoralState(CoralState.kL1), coralSys.elevator, coralSys.arm));
+		// .onTrue(Commands.runOnce(() -> coralSys.setCoralState(CoralState.kL1),
+		// coralSys.elevator, coralSys.arm));
 		// operatorController.x().onTrue(new ReleaseCoral(coralSys));
-		operatorController.a().onTrue(new InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.homePosition), coralSys.arm));
-		operatorController.b().onTrue(new InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.loadPosition), coralSys.arm));
-		operatorController.x().onTrue(new InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel1), coralSys.arm));
+		// operatorController.a().onTrue(new
+		// InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.homePosition),
+		// coralSys.arm));
+		// operatorController.b().onTrue(new
+		// InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.loadPosition),
+		// coralSys.arm));
+		// operatorController.x().onTrue(new
+		// InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel1),
+		// coralSys.arm));
 	}
 
 	private void registerAutoCommands() {
