@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 public class DriveCommands {
   private static final double DEADBAND = 0.2;
   private static final double ANGLE_KP = 14;
+  private static final double LIMELIGHT_ANGLE_KP = 0;
   private static final double ANGLE_KD = 0.1;
   private static final double ANGLE_MAX_VELOCITY = 30.0;
   private static final double ANGLE_MAX_ACCELERATION = 40.0;
@@ -173,6 +174,40 @@ public class DriveCommands {
           ChassisSpeeds speeds = new ChassisSpeeds(
               linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
               linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+              omega * drive.getMaxAngularSpeedRadPerSec());
+          boolean isFlipped = DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocity(
+              ChassisSpeeds.fromRobotRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()));
+        },
+        drive);
+  }
+
+public static Command angleToAprilTag(
+      Drive drive,
+      DoubleSupplier limelightAngle) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity (should just stop due to 0)
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks(0, 0);
+
+          // Multiplying tX and limrlight angle KP to equal omega
+          double omega = limelightAngle.getAsDouble() * LIMELIGHT_ANGLE_KP;
+          
+          // Applying deadband
+          omega = MathUtil.applyDeadband(omega, DEADBAND);
+          
+          // Multiplying omega by maximum angular velocity
+          omega = omega * ANGLE_MAX_VELOCITY;
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds = new ChassisSpeeds(
+              linearVelocity.getX() * 0,
+              linearVelocity.getY() * 0,
               omega * drive.getMaxAngularSpeedRadPerSec());
           boolean isFlipped = DriverStation.getAlliance().isPresent()
               && DriverStation.getAlliance().get() == Alliance.Red;

@@ -317,6 +317,7 @@ public class RobotContainer {
 		testController.leftBumper().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
 		operatorController.a().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
 		operatorController.b().onTrue(Commands.run(()->coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
+		operatorController.x().onTrue(DriveCommands.angleToAprilTag(drive, null, ()-> vision.getTargetX(0)));
 		// testController.x().whileTrue(coralSys.arm.dumbManualArmUp());
 		// testController.b().whileTrue(coralSys.arm.dumbManualArmDown());
 		// testController.leftTrigger(.75).whileTrue(Commands.startEnd(()->coralSys.arm.endAffectorIntakeEnable(), ()->coralSys.arm.endAffectorIntakeDisable(), coralSys.arm));
