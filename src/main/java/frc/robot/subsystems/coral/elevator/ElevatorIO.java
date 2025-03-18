@@ -14,6 +14,7 @@ public interface ElevatorIO {
     // *Boolean if elevator is at height setpoint within margin of error */
     public boolean atTarget = false;
     // TODO: ADD CARRIAGE VELOCITY
+    public double appliedVoltage = 0.0;
   }
   public default void manualElevatorStart(boolean up) {
 

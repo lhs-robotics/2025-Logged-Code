@@ -51,6 +51,8 @@ public class Elevator extends SubsystemBase {
     kLevel4;
   }
 
+
+
   /**
    * Creates elevator subsystem - this class gives orders to an IO class that
    * executes them
@@ -99,6 +101,10 @@ public class Elevator extends SubsystemBase {
     }
   }
 
+  public double getHeight(){
+    return elevatorInputs.height;
+  }
+
   /**
    * Sets elevator to preset height location Runs through the inches command
    * before going to IO as
@@ -109,8 +115,10 @@ public class Elevator extends SubsystemBase {
   public void setElevatorToLocation(elevatorPositions position) {
     switch (position) {
       case preLoadPosition:
-        setElevatorHeightInches(ElevatorConstants.loadHeight);
+        setElevatorHeightInches(ElevatorConstants.preLoadHeight);
         break;
+      case loaded:
+      setElevatorHeightInches(ElevatorConstants.loadedHeight);
       case homePosition:
         setElevatorHeightInches(ElevatorConstants.homeHeight);
         break;

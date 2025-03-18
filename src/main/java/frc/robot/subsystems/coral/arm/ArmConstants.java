@@ -4,13 +4,13 @@ import edu.wpi.first.math.util.Units;
 
 public class ArmConstants {
   public static final int gearboxSparkID = 24;
-  public static final double gearboxRatio =  1.0/((72 / 42) * 12);
+  public static final double gearboxRatio =  1.0;
 
   public static final double coralReleaseTimeSecs = 2;
 
-  public static final double loadAngle = 0;
+  public static final double loadAngle = 8.571456909179688;
   public static final double homeAngle = 0;
-  public static final double level1Angle = 0;
+  public static final double level1Angle = 2.5476183891296387;
   public static final double level2Angle = 0;
   public static final double level3Angle = 0;
   public static final double level4Angle = 0;
@@ -18,7 +18,7 @@ public class ArmConstants {
   public static final double manualVelocity = 0;
 
   public static final double positionP = 1;
-  public static final double positionD = 0;
+  public static final double positionD = 0.0;
 
   public static final double velocityP = 0;
   public static final double velocityI = 0;
@@ -35,4 +35,5 @@ public class ArmConstants {
   public static final int endAffectorSparkID = 25;
   public static final int endAffectorCurrentLimit = 40;
   public static final boolean endAffectorInverted = false;
+  public static final double minElevatorRotateHeight = 7;
 }

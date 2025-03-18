@@ -1,7 +1,11 @@
 package frc.robot.subsystems.coral;
 
+import java.time.Instant;
+
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -9,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.coral.LoadCoral;
 import frc.robot.subsystems.coral.CoralConstants.CoralState;
 import frc.robot.subsystems.coral.arm.Arm;
+import frc.robot.subsystems.coral.arm.ArmConstants;
 import frc.robot.subsystems.coral.arm.Arm.ArmPositions;
 import frc.robot.subsystems.coral.elevator.Elevator;
 import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
@@ -26,7 +31,7 @@ public class CoralSystem extends SubsystemBase {
 
     private final LoadCoral loadCoralCommand;
 
-    private final Trigger autoLoadTrigger;
+    // private final Trigger autoLoadTrigger;
 
     public CoralSystem(Arm arm, Elevator elevator, Indexer indexer, DriverFeedback feedback) {
         this.arm = arm;
@@ -37,66 +42,80 @@ public class CoralSystem extends SubsystemBase {
         currentState = CoralState.kStow;
 
         loadCoralCommand = new LoadCoral(this, feedback);
-        autoLoadTrigger = new Trigger(() -> autoLoadCoral == true).and(indexer.getAutoLoadTrigger());
+        // autoLoadTrigger = new Trigger(() -> autoLoadCoral ==
+        // true).and(indexer.getAutoLoadTrigger());
 
         // If autoLoadCoral is true run "loadCoralCommand" when in range
-        autoLoadTrigger.onTrue(
-                new SequentialCommandGroup(loadCoralCommand, new InstantCommand(() -> this.autoLoadCoral = false)));
+        // autoLoadTrigger.onTrue(
+        // new SequentialCommandGroup(loadCoralCommand, new InstantCommand(() ->
+        // this.autoLoadCoral = false)));
     }
 
     public void setCoralState(CoralState state) {
-        if (state == currentState) {
-            System.err.println("Coral Subsystem set to current state");
-            return;
-        }
-        Logger.recordOutput("Coral/state", state);
-        currentState = state;
+        // if (state == currentState) {
+        //     System.err.println("Coral Subsystem set to current state");
+        //     return;
+        // }
+        // Logger.recordOutput("Coral/state", state);
+        // currentState = state;
 
-        switch (state) {
-            case kStow -> {
-                indexer.disableIndexMotor();
+        // switch (state) {
+        //     case kStow -> {
+        //         indexer.disableIndexMotor();
 
-                elevator.setElevatorToLocation(elevatorPositions.homePosition);
-                arm.setArmToPosition(ArmPositions.homePosition);
-            }
-            case kL1 -> {
-                indexer.disableIndexMotor();
+        //         elevator.setElevatorToLocation(elevatorPositions.homePosition);
+        //         arm.setArmToPosition(ArmPositions.homePosition);
+        //     }
+        //     case kL1 -> {
+        //         indexer.disableIndexMotor();
 
-                elevator.setElevatorToLocation(elevatorPositions.kLevel1);
-                arm.setArmToPosition(ArmPositions.kLevel1);
-            }
-            case kL2 -> {
-                indexer.disableIndexMotor();
+        //         elevator.setElevatorToLocation(elevatorPositions.kLevel1);
+        //         if (elevator.getHeight() > ArmConstants.minElevatorRotateHeight) {
+        //             arm.setArmToPosition(ArmPositions.kLevel1);
+        //         } else {
+        //             new armWaitComamnd(ArmPositions.kLevel1);
+        //         }
+        //     }
+        //     case kL2 -> {
+        //         indexer.disableIndexMotor();
 
-                elevator.setElevatorToLocation(elevatorPositions.kLevel2);
-                arm.setArmToPosition(ArmPositions.kLevel2);
-            }
-            case kL3 -> {
-                indexer.disableIndexMotor();
+        //         elevator.setElevatorToLocation(elevatorPositions.kLevel2);
+        //         arm.setArmToPosition(ArmPositions.kLevel2);
+        //     }
+        //     case kL3 -> {
+        //         indexer.disableIndexMotor();
 
-                elevator.setElevatorToLocation(elevatorPositions.kLevel3);
-                arm.setArmToPosition(ArmPositions.kLevel3);
-            }
-            case kL4 -> {
-                indexer.disableIndexMotor();
+        //         elevator.setElevatorToLocation(elevatorPositions.kLevel3);
+        //         arm.setArmToPosition(ArmPositions.kLevel3);
+        //     }
+        //     case kL4 -> {
+        //         indexer.disableIndexMotor();
 
-                elevator.setElevatorToLocation(elevatorPositions.kLevel4);
-                arm.setArmToPosition(ArmPositions.kLevel4);
-            }
-            case kPreLoad -> {
-                elevator.setElevatorToLocation(elevatorPositions.preLoadPosition);
-                arm.setArmToPosition(ArmPositions.loadPosition);
-                indexer.enableIndexMotor();
+        //         elevator.setElevatorToLocation(elevatorPositions.kLevel4);
+        //         arm.setArmToPosition(ArmPositions.kLevel4);
+        //     }
+        //     case kPreLoad -> {
+        //         elevator.setElevatorToLocation(elevatorPositions.preLoadPosition);
+        //         // new SequentialCommandGroup(new InstantCommand(() -> elevator.setElevatorToLocation(elevatorPositions.preLoadPosition), elevator), new InstantCommand(()->arm.setArmToPosition(ArmPositions.loadPosition))).schedule();
+    
+        //         if (elevator.getHeight() > 6.5) {
+        //             arm.setArmToPosition(ArmPositions.loadPosition);
+        //         } else {
+        //             new armWaitComamnd(ArmPositions.loadPosition);
+        //         }
+        //         indexer.enableIndexMotor();
 
-                if (CoralConstants.autoLoadEnabled) {
-                    autoLoadCoral = true;
-                }
-            }
-            default -> throw new AssertionError();
-        }
+        //         if (CoralConstants.autoLoadEnabled) {
+        //             autoLoadCoral = true;
+        //         }
+        //     }
+        //     default -> throw new AssertionError();
+        // }
     }
+
     public Trigger getAutoLoadTrigger() {
-        return autoLoadTrigger;
+        // return autoLoadTrigger;
+        return null;
     }
 
     public void disable() {
@@ -109,5 +128,21 @@ public class CoralSystem extends SubsystemBase {
         elevator.enable();
         arm.enable();
         indexer.disableIndexMotor();
+    }
+
+    private class armWaitComamnd extends Command {
+        private final ArmPositions armPositions;
+        armWaitComamnd (ArmPositions armPositions) {
+            this.armPositions = armPositions;
+        }
+        @Override
+        public boolean isFinished() {
+            if (elevator.getHeight() > 6) {
+                arm.setArmToPosition(armPositions);
+                return true;
+            }
+            return false;
+        }
+
     }
 }
