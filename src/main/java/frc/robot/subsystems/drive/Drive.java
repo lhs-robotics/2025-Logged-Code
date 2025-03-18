@@ -25,6 +25,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -51,10 +52,14 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.LocalADStarAK;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import frc.robot.Robot;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
@@ -76,6 +81,8 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
       lastModulePositions, new Pose2d());
+  private final SwerveDrivePoseEstimator localPoseEstimator = new SwerveDrivePoseEstimator(
+      kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
   public Drive(
       GyroIO gyroIO,
@@ -102,7 +109,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(8.0, 0.0, 0.0), new PIDConstants(8.0, 0.0, 0.0)),
         ppConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -179,6 +186,8 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      localPoseEstimator.updateWithTime(
+          sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -259,6 +268,30 @@ public class Drive extends SubsystemBase {
       states[i] = modules[i].getState();
     }
     return states;
+  }
+
+  /** Returns the local estimated pose. */
+  @AutoLogOutput(key = "Odometry/LocalEstimatedPose")
+  public Pose2d getLocalEstimatedPose() {
+    return localPoseEstimator.getEstimatedPosition();
+  }
+
+  public void resetLocalPoseEstimatorBasedOnGlobal() {
+    localPoseEstimator.resetPose(poseEstimator.getEstimatedPosition());
+  }
+
+  /** Resets the current odometry pose. */
+  public void resetOdometry(Pose2d pose) {
+    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    localPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  public void addLocalVisionMeasurement(
+      Pose2d visionRobotPoseMeters,
+      double timestampSeconds,
+      Matrix<N3, N1> visionMeasurementStdDevs) {
+    localPoseEstimator.addVisionMeasurement(
+        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
   /**
@@ -348,20 +381,35 @@ public class Drive extends SubsystemBase {
 
   /**
    * Constructs a command to take the robot from current position to an end
-   * position. This does not flip the path depending on alliance
    * 
    * @param endPose Final pose to end the robot at
    * @return Command to drive along the constructed path
    */
+
   public Command driveToPoseCommand(Pose2d endPose) {
+    Logger.recordOutput("Drive/DriveToPoseEndPose", endPose);
+
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
+    System.out.println("ALIGNING TO POSE!!!!");
     // Create the constraints to use while pathfinding
     PathConstraints constraints = new PathConstraints(
         3.0, 4.0,
         Units.degreesToRadians(540), Units.degreesToRadians(720));
 
-
-    PathPlannerPath path = new PathPlannerPath(PathPlannerPath.waypointsFromPoses(getPose(), endPose), constraints, null,  new GoalEndState(MetersPerSecond.of(0), endPose.getRotation()));
-
+    PathPlannerPath path = new PathPlannerPath(PathPlannerPath.waypointsFromPoses(getPose(), endPose), constraints,
+        null, new GoalEndState(MetersPerSecond.of(0), endPose.getRotation()));
+    if (Robot.onRedAlliance()) {
+      path = path.flipPath();
+    }
     Command pathFollowingCommand = AutoBuilder.followPath(path);
     return pathFollowingCommand;
   }

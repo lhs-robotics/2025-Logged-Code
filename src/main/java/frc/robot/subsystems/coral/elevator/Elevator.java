@@ -9,6 +9,7 @@ import java.time.Instant;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -206,7 +207,7 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/Velocity Setpoint", 0);
     setElevatorToLocation(elevatorPositions.homePosition);
     // Waot for elevator to get to target before turning off
-    atTargetHeight.onTrue(new ParallelCommandGroup(new InstantCommand(() -> elevatorIO.disableBreak(), this), new InstantCommand(() -> runVoltage(0), this)));
+    atTargetHeight.onTrue(new SequentialCommandGroup(new InstantCommand(() -> elevatorIO.disableBreak(), this), new InstantCommand(() -> runVoltage(0), this)));
 
   }
 

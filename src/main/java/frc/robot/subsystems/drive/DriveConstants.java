@@ -16,13 +16,14 @@ package frc.robot.subsystems.drive;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-    public static final double maxSpeedMetersPerSec = 4.8;
+    public static final double maxSpeedMetersPerSec = 8;
     public static final double odometryFrequency = 100.0; // Hz
     public static final double trackWidth = Units.inchesToMeters(23.750);
     public static final double wheelBase = Units.inchesToMeters(23.750);
@@ -71,7 +72,7 @@ public class DriveConstants {
                                                                                                         // Wheel Rad/Sec
 
     // Drive PID configuration
-    public static final double driveKp = 0.001;
+    public static final double driveKp = 0.01;
     public static final double driveKd = 0.0;
     public static final double driveKs = 0.0;
     public static final double driveKv = 0.1;

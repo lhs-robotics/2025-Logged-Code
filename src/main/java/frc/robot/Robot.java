@@ -163,6 +163,8 @@ public class Robot extends LoggedRobot {
    * @return true if the robot is on Red, false if the robot is on Blue
    */
   public static boolean onRedAlliance() {
+    System.out.println("ROBOT ALLIANCE" +  DriverStation.getAlliance().get().toString());
+    Logger.recordOutput("Robot Alliance", DriverStation.getAlliance().get().toString());
     return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 

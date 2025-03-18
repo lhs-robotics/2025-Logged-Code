@@ -139,9 +139,9 @@ public class Field {
     public static final List<Pose2d> redCoralStationList = List.of(redStationLow, redStationTop);
 
     // Offsets
-    public static final Distance reefOffsetDistance = Inches.of(Units.metersToFeet(DriveConstants.wheelBase / 2) + 6);
+    public static final Distance reefOffsetDistance = Inches.of(Units.metersToFeet(DriveConstants.wheelBase / 2) + 10);
 
-    public static final Distance stationOffsetDistance = Inches.of(Units.metersToFeet(DriveConstants.wheelBase / 2) + 2);
+    public static final Distance stationOffsetDistance = Inches.of(Units.metersToFeet(DriveConstants.wheelBase / 2) + 10);
 
     // Processor
     // ^ processor location is on the edge of the arena carpet rather then the exact

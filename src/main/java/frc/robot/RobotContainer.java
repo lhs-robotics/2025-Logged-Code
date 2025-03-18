@@ -99,6 +99,7 @@ public class RobotContainer {
 						driverFeedback);
 				vision = new Vision(
 						drive::addVisionMeasurement,
+						drive::addLocalVisionMeasurement,
 						new VisionIOLimelight(camera0Name, drive::getRotation),
 						new VisionIOLimelight(camera1Name, drive::getRotation));
 				climb = new Climb(new ClimbIOSpark());
@@ -117,6 +118,7 @@ public class RobotContainer {
 						new ModuleIOSim());
 				vision = new Vision(
 						drive::addVisionMeasurement,
+						drive::addLocalVisionMeasurement,
 						new VisionIOPhotonVisionSim(camera0Name, robotToCamera0,
 								drive::getPose),
 						new VisionIOPhotonVisionSim(camera1Name, robotToCamera1,
@@ -152,7 +154,7 @@ public class RobotContainer {
 						},
 						new ModuleIO() {
 						});
-				vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+				vision = new Vision(drive::addVisionMeasurement, drive::addLocalVisionMeasurement, new VisionIO() {
 				}, new VisionIO() {
 				});
 				coralSys = new CoralSystem(
@@ -174,6 +176,7 @@ public class RobotContainer {
 		stateManager = new StateManager(coralSys, climb, algae, driverFeedback);
 
 		// Set up auto routines
+		registerAutoCommands();
 		autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
 		// Set up SysId routines
@@ -209,7 +212,6 @@ public class RobotContainer {
 
 		// Configure the button bindings
 		configureButtonBindings();
-		registerAutoCommands();
 	}
 
 	/**
@@ -228,9 +230,7 @@ public class RobotContainer {
 						() -> -driveController.getLeftY(),
 						() -> -driveController.getLeftX(),
 						() -> -driveController.getRightX()));
-		// TEST COMMAND
-		drive.setDefaultCommand(
-				DriveCommands.driveStraightForwardBack(drive, () -> driveController.getLeftY()));
+
 		// Lock to 0° when A button is held
 		driveController
 				.a()
