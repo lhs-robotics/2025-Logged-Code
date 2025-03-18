@@ -72,13 +72,13 @@ public class ElevatorIOSpark implements ElevatorIO {
         .i(ElevatorConstants.velocityI, ClosedLoopSlot.kSlot1)
         .d(ElevatorConstants.velocityD, ClosedLoopSlot.kSlot1);
 
-    motorConfig.closedLoop.maxMotion
-    // // These are the speeds max motion will attempt to achieve (not maximum it
-    // will
-    // // go to, what it will always go to )
-    .maxVelocity(ElevatorConstants.maxVelocity)
-    .maxAcceleration(ElevatorConstants.maxAcceleration)
-    .allowedClosedLoopError(ElevatorConstants.allowedError);
+    // motorConfig.closedLoop.maxMotion
+    // // // These are the speeds max motion will attempt to achieve (not maximum it
+    // // will
+    // // // go to, what it will always go to )
+    // .maxVelocity(ElevatorConstants.maxVelocity)
+    // .maxAcceleration(ElevatorConstants.maxAcceleration)
+    // .allowedClosedLoopError(ElevatorConstants.allowedError);
 
     motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -111,6 +111,7 @@ public class ElevatorIOSpark implements ElevatorIO {
     sparkStickyFault = false;
     ifOk(motor1, encoder::getPosition, (value) -> inputs.height = value);
     ifOk(motor1, encoder::getVelocity, (value) -> inputs.velocityRPM = value);
+    ifOk(motor1, motor1::getAppliedOutput, (value) -> inputs.appliedVoltage = value);
     inputs.atTarget = checkAtTarget();
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
   }
@@ -136,8 +137,8 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     heighSetpoint = heightInches;
 
-    elevatorController.setReference(
-        heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0);
+    // elevatorController.setReference(
+    //     heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0);
   }
 
   /**
@@ -146,7 +147,7 @@ public class ElevatorIOSpark implements ElevatorIO {
    * @param output Voltage to run at
    */
   public void runCharacterization(double output) {
-    motor1.setVoltage(output);
+    // motor1.setVoltage(output);
   }
 
   /**
@@ -204,9 +205,9 @@ public class ElevatorIOSpark implements ElevatorIO {
   @Override
   public void manualElevatorStart(boolean up) {
     if (up) {
-      motor1.set(0.40);
+      motor1.set(0.60);
     } else {
-      motor1.set(-0.40);
+      motor1.set(-0.60);
     }
   }
 

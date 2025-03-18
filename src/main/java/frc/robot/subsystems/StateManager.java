@@ -22,7 +22,7 @@ public class StateManager extends SubsystemBase {
     private final Climb climb;
     private final Algae algae;
     private final DriverFeedback driverFeedback;
-
+    public int currentAprilTagTarget = 0;
     public StateManager(CoralSystem coralSys, Climb climb, Algae algae,
             DriverFeedback driverFeedback) {
         this.coralSys = coralSys;

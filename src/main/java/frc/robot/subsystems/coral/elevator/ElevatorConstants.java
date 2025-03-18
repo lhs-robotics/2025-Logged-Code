@@ -20,17 +20,18 @@ public class ElevatorConstants {
 
   public static final double positionP = 1;
   public static final double positionI = 0;
-  public static final double positionD = 0.001;
+  public static final double positionD = 0;
 
-  public static final double positionConversionFactor = 1.3344; //0.7493
+  public static final double positionConversionFactor = 1; //0.7493
 
-  public static final double maxVelocity = 2000;
-  public static final double maxAcceleration = 5000;
-  public static final double allowedError = 0.5;
+  public static final double maxVelocity = 500;
+  public static final double maxAcceleration = 750;
+  public static final double allowedError = 0.1;
 
-  public static final double loadHeight = 5;
-  public static final double homeHeight = 0.25;
-  public static final double level1Height = 10;
+  public static final double preLoadHeight = 16.35712432861328;
+  public static final double homeHeight = 0;
+  public static final double loadedHeight = 9.714326858520508;
+  public static final double level1Height = 7.928591251373291;
   public static final double level2Height = 0;
   public static final double level3Height = 0;
   public static final double level4Height = 0;

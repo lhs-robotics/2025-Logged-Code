@@ -3,13 +3,9 @@ package frc.robot.subsystems.coral.elevator;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
-
-import java.time.Instant;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -50,6 +46,8 @@ public class Elevator extends SubsystemBase {
     kLevel3,
     kLevel4;
   }
+
+
 
   /**
    * Creates elevator subsystem - this class gives orders to an IO class that
@@ -99,6 +97,10 @@ public class Elevator extends SubsystemBase {
     }
   }
 
+  public double getHeight(){
+    return elevatorInputs.height;
+  }
+
   /**
    * Sets elevator to preset height location Runs through the inches command
    * before going to IO as
@@ -109,8 +111,10 @@ public class Elevator extends SubsystemBase {
   public void setElevatorToLocation(elevatorPositions position) {
     switch (position) {
       case preLoadPosition:
-        setElevatorHeightInches(ElevatorConstants.loadHeight);
+        setElevatorHeightInches(ElevatorConstants.preLoadHeight);
         break;
+      case loaded:
+      setElevatorHeightInches(ElevatorConstants.loadedHeight);
       case homePosition:
         setElevatorHeightInches(ElevatorConstants.homeHeight);
         break;

@@ -54,7 +54,7 @@ public class ArmIOSpark implements ArmIO {
                 .p(ArmConstants.velocityP, ClosedLoopSlot.kSlot1)
                 .i(ArmConstants.velocityI, ClosedLoopSlot.kSlot1)
                 .d(ArmConstants.velocityD, ClosedLoopSlot.kSlot1);
-
+        gearMotorConfig.closedLoop.maxMotion.maxVelocity(400).maxAcceleration(350).allowedClosedLoopError(0.5);
         gearboxSpark.configure(gearMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         gearboxEncoder.setPosition(0);
 
@@ -79,7 +79,7 @@ public class ArmIOSpark implements ArmIO {
     @Override
     public void setArmAngleDegrees(double angleDegrees) {
         angleSetpoint = angleDegrees;
-        // gearboxPID.setReference(angleDegrees, ControlType.kPosition);
+        gearboxPID.setReference(angleDegrees, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0);
     }
 
     @Override

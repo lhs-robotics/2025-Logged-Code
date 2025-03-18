@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.coral.CoralSystem;
+import frc.robot.subsystems.coral.elevator.Elevator;
+import frc.robot.subsystems.coral.elevator.Elevator.elevatorPositions;
 import frc.robot.util.LoggedTunableNumber;
 
 public class Arm extends SubsystemBase {
@@ -54,7 +57,6 @@ public class Arm extends SubsystemBase {
    */
   public Arm(ArmIO armIO) {
     this.armIO = armIO;
-
     sysId = new SysIdRoutine(
         new SysIdRoutine.Config(
             null,
@@ -94,7 +96,7 @@ public class Arm extends SubsystemBase {
    */
   public void setArmToPosition(ArmPositions position) {
     switch (position) {
-      case loadPosition -> setArmAngleDegrees(ArmConstants.loadAngle);
+      case loadPosition ->setArmAngleDegrees(ArmConstants.loadAngle);
       case homePosition -> setArmAngleDegrees(ArmConstants.homeAngle);
       case kLevel1 -> setArmAngleDegrees(ArmConstants.level1Angle);
       case kLevel2 -> setArmAngleDegrees(ArmConstants.level2Angle);
@@ -104,13 +106,17 @@ public class Arm extends SubsystemBase {
       default -> {
       }
     }
+
   }
+
   public Command dumbManualArmUp() {
-    return Commands.startEnd(()->armIO.manualRunArm(true), ()->armIO.manualArmStop(), this);
+    return Commands.startEnd(() -> armIO.manualRunArm(true), () -> armIO.manualArmStop(), this);
   }
+
   public Command dumbManualArmDown() {
-    return Commands.startEnd(()->armIO.manualRunArm(false), ()->armIO.manualArmStop(), this);
+    return Commands.startEnd(() -> armIO.manualRunArm(false), () -> armIO.manualArmStop(), this);
   }
+
   /**
    * @return Returns if arm is within accaptable error margin of PID setpoint (FOR
    *         ANGLE)
@@ -148,26 +154,26 @@ public class Arm extends SubsystemBase {
     armIO.setVelocity(0);
   }
 
-
   // Sepereate commands for easy use in auto load routine
   public void endAffectorIntakeEnable() {
     Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralIntakeSpeed);
     armIO.setEndAffectorSpeed(ArmConstants.coralIntakeSpeed);
   }
+
   public void endAffectorIntakeDisable() {
     Logger.recordOutput("Arm/End Affector Speed Setpoint", 0);
     armIO.setEndAffectorSpeed(0);
   }
 
   public Command releaseCoral() {
-    return new SequentialCommandGroup(new InstantCommand(this::releaseCoralBegin), new WaitCommand(ArmConstants.coralReleaseTimeSecs), new InstantCommand(this::endAffectorIntakeDisable));
+    return new SequentialCommandGroup(new InstantCommand(this::releaseCoralBegin),
+        new WaitCommand(ArmConstants.coralReleaseTimeSecs), new InstantCommand(this::endAffectorIntakeDisable));
   }
 
   private void releaseCoralBegin() {
     Logger.recordOutput("Arm/End Affector Speed Setpoint", ArmConstants.coralReleaseSpeed);
     armIO.setEndAffectorSpeed(ArmConstants.coralReleaseSpeed);
   }
-
 
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -185,16 +191,15 @@ public class Arm extends SubsystemBase {
     armIO.runCharacterization(output);
   }
 
-public void disable() {
+  public void disable() {
     setArmToPosition(ArmPositions.homePosition);
     endAffectorIntakeDisable();
     armIO.disableEndAffectorBrake();
-}
+  }
 
-public void enable() {
-  setArmToPosition(ArmPositions.loadPosition);
-  armIO.enableEndAffectorBrake();
-}
+  public void enable() {
+    setArmToPosition(ArmPositions.loadPosition);
+    armIO.enableEndAffectorBrake();
+  }
 
-  
 }
