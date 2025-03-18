@@ -2,6 +2,8 @@ package frc.robot.commands.auto;
 
 import java.util.Set;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -14,60 +16,75 @@ import frc.robot.subsystems.drive.Drive;
 
 public class AlignmentCommands {
     /**
-     * Creates a command to drive the robot to the nearest left-sdie reef pole from its current position
+     * Creates a command to drive the robot to the nearest left-sdie reef pole from
+     * its current position
+     * 
      * @return driveToPoseCommand to drive to the nearest reef pole on your side
      */
     public static Command alignToLeftReef(Drive drive) {
         return Commands.defer(
-            () -> {
-                Pose2d reefPose = drive.getPose().nearest(Robot.onRedAlliance() ? Field.redReefListLeft : Field.blueReefListLeft);
-                Translation2d reefOffset = new Translation2d(Field.reefOffsetDistance, Inches.of(0)).rotateBy(reefPose.getRotation());
-                return drive.driveToPoseCommand(
-                        reefPose.getMeasureX().plus(reefOffset.getMeasureX()),
-                        reefPose.getMeasureY().plus(reefOffset.getMeasureY()),
-                        reefPose.getRotation().plus(Rotation2d.fromDegrees(180))
-                ); 
-            },
-            Set.of(drive)
-        ).withName("Align Left Reef");
+                () -> {
+                    Pose2d reefPose = drive.getPose()
+                            .nearest(Robot.onRedAlliance() ? Field.redReefListLeft : Field.blueReefListLeft);
+                    Logger.recordOutput("Target Alignment Pose", reefPose);
+                    System.out.println("is on Red alliance: " + Robot.onRedAlliance());
+
+                    Translation2d reefOffset = new Translation2d(Field.reefOffsetDistance, Inches.of(0))
+                            .rotateBy(reefPose.getRotation());
+                    return drive.driveToPoseCommand(
+                            reefPose.getMeasureX().plus(reefOffset.getMeasureX()),
+                            reefPose.getMeasureY().plus(reefOffset.getMeasureY()),
+                            reefPose.getRotation().plus(Rotation2d.fromDegrees(180)));
+                },
+                Set.of(drive)).withName("Align Left Reef");
     }
 
     /**
-     * Creates a command to drive the robot to the nearest right-side reef pole from its current position
+     * Creates a command to drive the robot to the nearest right-side reef pole from
+     * its current position
+     * 
      * @return driveToPoseCommand to drive to the nearest reef pole on your side
      */
     public static Command alignToRightReef(Drive drive) {
         return Commands.defer(
-            () -> {
-                Pose2d reefPose = drive.getPose().nearest(Robot.onRedAlliance() ? Field.redReefListRight : Field.blueReefListRight);
-                Translation2d reefOffset = new Translation2d(Field.reefOffsetDistance, Inches.of(0)).rotateBy(reefPose.getRotation());
-                return drive.driveToPoseCommand(
-                        reefPose.getMeasureX().plus(reefOffset.getMeasureX()),
-                        reefPose.getMeasureY().plus(reefOffset.getMeasureY()),
-                        reefPose.getRotation().plus(Rotation2d.fromDegrees(180))
-                ); 
-            },
-            Set.of(drive)
-        ).withName("Align Right Reef");
+                () -> {
+                    Pose2d reefPose = drive.getPose()
+                            .nearest(Robot.onRedAlliance() ? Field.redReefListRight : Field.blueReefListRight);
+                    Logger.recordOutput("Target Alignment Pose", reefPose);
+                    System.out.println("is on Red alliance: " + Robot.onRedAlliance());
+
+
+                    Translation2d reefOffset = new Translation2d(Field.reefOffsetDistance, Inches.of(0))
+                            .rotateBy(reefPose.getRotation());
+                    return drive.driveToPoseCommand(
+                            reefPose.getMeasureX().plus(reefOffset.getMeasureX()),
+                            reefPose.getMeasureY().plus(reefOffset.getMeasureY()),
+                            reefPose.getRotation().plus(Rotation2d.fromDegrees(180)));
+                },
+                Set.of(drive)).withName("Align Right Reef");
     }
 
     /**
      * Creates a command to drive the robot to the nearest coral station to it
+     * 
      * @return driveToPoseCommand to drive to the nearest station on your side
      */
     public static Command alignToCoralStation(Drive drive) {
         return Commands.defer(
-            () -> {
-                Pose2d stationPose = drive.getPose().nearest(Robot.onRedAlliance() ? Field.redCoralStationList : Field.blueCoralStationList);
-                Translation2d stationOffset = new Translation2d(Field.stationOffsetDistance, Inches.of(0)).rotateBy(stationPose.getRotation());
-                return drive.driveToPoseCommand(            
-                        stationPose.getMeasureX().plus(stationOffset.getMeasureX()),
-                        stationPose.getMeasureY().plus(stationOffset.getMeasureY()),
-                        stationPose.getRotation().plus(Rotation2d.fromDegrees(180))
-                );
-            }, 
-            Set.of(drive)
-        ).withName("Align Coral Station");
+                () -> {
+                    Pose2d stationPose = drive.getPose()
+                            .nearest(Robot.onRedAlliance() ? Field.redCoralStationList : Field.blueCoralStationList);
+                    System.out.println("is on Red alliance: " + Robot.onRedAlliance());
+                    Logger.recordOutput("Target Alignment Pose", stationPose);
+
+                    Translation2d stationOffset = new Translation2d(Field.stationOffsetDistance, Inches.of(0))
+                            .rotateBy(stationPose.getRotation());
+                    return drive.driveToPoseCommand(
+                            stationPose.getMeasureX().plus(stationOffset.getMeasureX()),
+                            stationPose.getMeasureY().plus(stationOffset.getMeasureY()),
+                            stationPose.getRotation().plus(Rotation2d.fromDegrees(0)));
+                },
+                Set.of(drive)).withName("Align Coral Station");
     }
 
 }
