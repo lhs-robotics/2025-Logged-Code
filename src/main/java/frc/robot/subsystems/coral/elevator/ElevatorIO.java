@@ -26,7 +26,7 @@ public interface ElevatorIO {
 
   public default void disableBreak(){}
 
-  public default void setElevatorHeightInches(double heightInches) {}
+  public default void setElevatorHeight(double heightInches) {}
 
   public default void runCharacterization(double output) {}
 

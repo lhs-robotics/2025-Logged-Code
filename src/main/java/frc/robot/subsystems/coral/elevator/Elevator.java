@@ -3,6 +3,9 @@ package frc.robot.subsystems.coral.elevator;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -67,9 +70,9 @@ public class Elevator extends SubsystemBase {
     // heights allowing accurate stabilization
     sysId = new SysIdRoutine(
         new SysIdRoutine.Config(
-            null,
-            null,
-            null,
+            Volts.per(Second).of(1),
+            Volts.of(5),
+            Seconds.of(10),
             (state) -> Logger.recordOutput("Elevator/SysIdState", state.toString())),
         new SysIdRoutine.Mechanism(
             (voltage) -> runVoltage(voltage.in(Volts)), null, this));
@@ -164,7 +167,7 @@ public class Elevator extends SubsystemBase {
    */
   public void setElevatorHeightInches(double inches) {
     Logger.recordOutput("Elevator/HeightSetpoint", inches);
-    elevatorIO.setElevatorHeightInches(inches);
+    elevatorIO.setElevatorHeight(inches);
   }
 
   public void manualElevatorUp() {

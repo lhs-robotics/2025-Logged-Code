@@ -12,7 +12,14 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.coral.elevator.ElevatorConstants;
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
@@ -26,6 +33,17 @@ public class ArmIOSpark implements ArmIO {
     private final SparkMax endAffectorMotor;
 
     private final Debouncer connectedDebounce = new Debouncer(0.5);
+
+    private final ArmFeedforward m_feedforward = new ArmFeedforward(
+            ArmConstants.kS,
+            ArmConstants.kG,
+            ArmConstants.kA);
+
+    private final ProfiledPIDController m_controller = new ProfiledPIDController(ArmConstants.positionP,
+            0,
+            ArmConstants.positionD,
+            new Constraints(ArmConstants.maxVelocity,
+                    ArmConstants.maxAcceleration));
 
     public ArmIOSpark() {
         gearboxSpark = new SparkMax(ArmConstants.gearboxSparkID, MotorType.kBrushless);
@@ -41,7 +59,7 @@ public class ArmIOSpark implements ArmIO {
                 .voltageCompensation(12.0)
                 .inverted(ArmConstants.gearBoxInveted);
 
-        gearMotorConfig.encoder.positionConversionFactor(ArmConstants.gearboxRatio);
+        gearMotorConfig.encoder.positionConversionFactor(Units.rotationsToDegrees((72.0/42.0)/12.0));
 
         gearMotorConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -56,7 +74,7 @@ public class ArmIOSpark implements ArmIO {
                 .d(ArmConstants.velocityD, ClosedLoopSlot.kSlot1);
         gearMotorConfig.closedLoop.maxMotion.maxVelocity(400).maxAcceleration(350).allowedClosedLoopError(0.5);
         gearboxSpark.configure(gearMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        gearboxEncoder.setPosition(0);
+        gearboxEncoder.setPosition(90);
 
         SparkMaxConfig endAffectorConfig = new SparkMaxConfig();
         endAffectorConfig.idleMode(IdleMode.kCoast)
@@ -76,10 +94,24 @@ public class ArmIOSpark implements ArmIO {
         gearboxSpark.setVoltage(output);
     }
 
+    private void reachGoal(double goal) {
+        double voltsOut = MathUtil.clamp(
+                m_controller.calculate(gearboxEncoder.getPosition(), goal) +
+                    m_feedforward.calculate(Units.degreesToRadians(gearboxEncoder.getPosition()),
+                                m_controller.getSetpoint().velocity),
+                -12,
+                12); // 7 is the max voltage to send out.
+        gearboxSpark.setVoltage(voltsOut);
+    }
+
     @Override
     public void setArmAngleDegrees(double angleDegrees) {
-        angleSetpoint = angleDegrees;
-        gearboxPID.setReference(angleDegrees, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0);
+        // angleSetpoint = angleDegrees;
+        // gearboxPID.setReference(angleDegrees, ControlType.kMAXMotionPositionControl,
+        // ClosedLoopSlot.kSlot0);
+
+        Commands.run(() -> reachGoal(angleDegrees)).schedule();
+
     }
 
     @Override
@@ -133,7 +165,7 @@ public class ArmIOSpark implements ArmIO {
 
     @Override
     public void manualRunArm(boolean up) {
-        if (up){
+        if (up) {
             gearboxSpark.set(0.2);
         } else {
             gearboxSpark.set(-0.2);
@@ -145,9 +177,5 @@ public class ArmIOSpark implements ArmIO {
         gearboxSpark.set(0);
         gearboxPID.setReference(gearboxEncoder.getPosition(), ControlType.kPosition);
     }
-
-    
-
-    
 
 }

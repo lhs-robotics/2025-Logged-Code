@@ -12,8 +12,13 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj2.command.Commands;
+
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 
@@ -32,7 +37,17 @@ public class ElevatorIOSpark implements ElevatorIO {
   // MODIFY)
   private double heighSetpoint = 0.0;
 
-  ElevatorFeedforward feedForward;
+  private final ElevatorFeedforward m_feedforward = new ElevatorFeedforward(
+      ElevatorConstants.kS,
+      ElevatorConstants.kG,
+      ElevatorConstants.kV,
+      ElevatorConstants.kA);
+
+  private final ProfiledPIDController m_controller = new ProfiledPIDController(ElevatorConstants.positionP,
+      ElevatorConstants.positionI,
+      ElevatorConstants.positionD,
+      new Constraints(ElevatorConstants.maxVelocity,
+          ElevatorConstants.maxAcceleration));
 
   public ElevatorIOSpark() {
     // You know what this one does
@@ -54,32 +69,6 @@ public class ElevatorIOSpark implements ElevatorIO {
         .voltageCompensation(12.0)
         .inverted(ElevatorConstants.motor1Inveted);
 
-    // Converts from motor rotation to height gained in inches
-    // TODO: CALCULATE THIS CONVERSION FACTOR
-
-    motorConfig.encoder.positionConversionFactor(ElevatorConstants.positionConversionFactor);
-    motorConfig.encoder.velocityConversionFactor(ElevatorConstants.positionConversionFactor);
-
-    motorConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        // Position Control PID
-        .p(ElevatorConstants.positionP, ClosedLoopSlot.kSlot0)
-        .i(ElevatorConstants.positionI, ClosedLoopSlot.kSlot0)
-        .d(ElevatorConstants.positionD, ClosedLoopSlot.kSlot0)
-        .outputRange(-1, 1);
-    motorConfig.closedLoop
-        .p(ElevatorConstants.velocityP, ClosedLoopSlot.kSlot1)
-        .i(ElevatorConstants.velocityI, ClosedLoopSlot.kSlot1)
-        .d(ElevatorConstants.velocityD, ClosedLoopSlot.kSlot1);
-
-    // motorConfig.closedLoop.maxMotion
-    // // // These are the speeds max motion will attempt to achieve (not maximum it
-    // // will
-    // // // go to, what it will always go to )
-    // .maxVelocity(ElevatorConstants.maxVelocity)
-    // .maxAcceleration(ElevatorConstants.maxAcceleration)
-    // .allowedClosedLoopError(ElevatorConstants.allowedError);
-
     motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkMaxConfig motorBConfig = new SparkMaxConfig();
@@ -87,8 +76,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(ElevatorConstants.elevatorMotorSmartCurrentLimit)
         .voltageCompensation(12.0)
-        .inverted(ElevatorConstants.elevatorMotor2Inverted)
-        .follow(motor1);
+        .follow(motor1, true);
     // Modify motor config for motor 2
     motor2.configure(motorBConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -96,11 +84,6 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     // Elevator Boot Location is 0
     encoder.setPosition(0);
-
-    // Feedforward compensates for gravity - even if it is not moving the motor
-    // needs some voltage to keep the elevator from sliding down
-    feedForward = new ElevatorFeedforward(
-        ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV, ElevatorConstants.kA);
   }
 
   /**
@@ -116,6 +99,16 @@ public class ElevatorIOSpark implements ElevatorIO {
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
   }
 
+  private void reachGoal(double goal) {
+    double voltsOut = MathUtil.clamp(
+        m_controller.calculate(encoder.getPosition(), goal) +
+            m_feedforward.calculateWithVelocities(encoder.getVelocity(),
+                m_controller.getSetpoint().velocity),
+        -12,
+        12); // 7 is the max voltage to send out.
+    motor1.setVoltage(voltsOut);
+  }
+
   /**
    * Returns if elevator is within ElevatorConstants.allowedError of target
    * setpoint for position (NOT VELOCITY)
@@ -127,18 +120,18 @@ public class ElevatorIOSpark implements ElevatorIO {
 
   @Override
   /** Sets elevator height from elevator bootup 0 (not robot base) */
-  public void setElevatorHeightInches(double heightInches) {
+  public void setElevatorHeight(double heightRot) {
     // Feedforward compensates for gravity - even if it is not moving the motor
     // needs some voltage to keep the elevator from sliding down
     // In this case it also is used to determine how many additional volts it likely
     // needs to accelerate to movement (acceleration takes much more energy than
     // cruise)
-    double feedforward = feedForward.calculate(ElevatorConstants.maxVelocity);
 
-    heighSetpoint = heightInches;
+    Commands.run(() -> reachGoal(heightRot)).schedule();
 
     // elevatorController.setReference(
-    //     heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0);
+    // heightInches, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0,
+    // 0);
   }
 
   /**
@@ -147,7 +140,7 @@ public class ElevatorIOSpark implements ElevatorIO {
    * @param output Voltage to run at
    */
   public void runCharacterization(double output) {
-    // motor1.setVoltage(output);
+    motor1.setVoltage(output);
   }
 
   /**
@@ -205,9 +198,9 @@ public class ElevatorIOSpark implements ElevatorIO {
   @Override
   public void manualElevatorStart(boolean up) {
     if (up) {
-      motor1.set(0.60);
+      motor1.set(0.30);
     } else {
-      motor1.set(-0.60);
+      motor1.set(-0.30);
     }
   }
 

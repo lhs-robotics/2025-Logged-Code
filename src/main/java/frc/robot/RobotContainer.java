@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -310,18 +312,18 @@ public class RobotContainer {
 		// Commands.run(()->coralSys.elevator.setElevatorToLocation(elevatorPositions.preLoadPosition),
 		// coralSys.elevator))));
 		// testController.a().whileTrue(coralSys.elevator.manualElevatorUpCommand());
-		testController.a().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(1), coralSys.elevator));
-		testController.b().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(3), coralSys.elevator));
-		testController.x().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(5), coralSys.elevator));
-		testController.y().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(10), coralSys.elevator));
-		testController.rightBumper()
-				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(15), coralSys.elevator));
-		testController.leftBumper()
-				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
-		operatorController.a()
-				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
-		operatorController.b()
-				.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
+		// testController.a().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(1), coralSys.elevator));
+		// testController.b().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(3), coralSys.elevator));
+		// testController.x().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(5), coralSys.elevator));
+		// testController.y().onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(10), coralSys.elevator));
+		// testController.rightBumper()
+		// 		.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(15), coralSys.elevator));
+		// testController.leftBumper()
+		// 		.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(20), coralSys.elevator));
+		// operatorController.a()
+		// 		.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(30), coralSys.elevator));
+		// operatorController.b()
+		// 		.onTrue(Commands.run(() -> coralSys.elevator.setElevatorHeightInches(35), coralSys.elevator));
 		// testController.x().whileTrue(coralSys.arm.dumbManualArmUp());
 		// testController.b().whileTrue(coralSys.arm.dumbManualArmDown());
 		// testController.leftTrigger(.75).whileTrue(Commands.startEnd(()->coralSys.arm.endAffectorIntakeEnable(),
@@ -345,6 +347,9 @@ public class RobotContainer {
 		// operatorController.x().onTrue(new
 		// InstantCommand(()->coralSys.arm.setArmToPosition(ArmPositions.kLevel1),
 		// coralSys.arm));
+		
+		testController.a().whileTrue(coralSys.elevator.manualElevatorUpCommand());
+		testController.b().whileTrue(coralSys.elevator.manualElevatorDownCommand());
 	}
 
 	private void registerAutoCommands() {

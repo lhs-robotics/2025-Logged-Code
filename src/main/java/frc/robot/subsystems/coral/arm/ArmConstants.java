@@ -4,7 +4,7 @@ import edu.wpi.first.math.util.Units;
 
 public class ArmConstants {
   public static final int gearboxSparkID = 24;
-  public static final double gearboxRatio =  1.0;
+  public static final double gearboxRatio =  (72/42)/12;
 
   public static final double coralReleaseTimeSecs = 2;
 
@@ -36,4 +36,7 @@ public class ArmConstants {
   public static final int endAffectorCurrentLimit = 40;
   public static final boolean endAffectorInverted = false;
   public static final double minElevatorRotateHeight = 7;
+public static final double kG = 0;
+public static final double kA = 0;
+public static double kS;
 }
